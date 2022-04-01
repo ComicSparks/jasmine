@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/configs/login.dart';
-import 'package:jasmine/configs/versions.dart';
+import 'package:jasmine/screens/about_screen.dart';
 import 'package:jasmine/screens/components/avatar.dart';
-import 'package:jasmine/screens/components/badge.dart';
 import 'package:jasmine/screens/view_log_screen.dart';
 
+import 'components/badge.dart';
 import 'downloads_screen.dart';
 import 'favorites_screen.dart';
 
@@ -43,6 +43,7 @@ class _UserScreenState extends State<UserScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text("个人中心"),
+        actions: [_buildAbout()]
       ),
       body: SafeArea(
         child: ListView(
@@ -55,10 +56,8 @@ class _UserScreenState extends State<UserScreen>
             const Divider(),
             _buildDownloads(),
             const Divider(),
+
             Container(height: 30),
-            _buildVersion(),
-            Container(height: 30),
-            _buildVersionText(),
           ],
         ),
       ),
@@ -197,50 +196,16 @@ class _UserScreenState extends State<UserScreen>
     );
   }
 
-  Widget _buildVersion() {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Center(
-          child: VersionBadged(
-            child: MaterialButton(
-              color: Colors.grey.shade200,
-              onPressed: () {
-                openUrl("https://github.com/niuhuan/jasmine/releases/");
-              },
-              child: SizedBox(
-                width: constraints.maxWidth - 30,
-                height: 80,
-                child: Center(
-                  child: Text(
-                    "当前版本 " +
-                        currentVersion() +
-                        "\n" +
-                        (latestVersion == null
-                            ? "没有检测到新版本"
-                            : "检测到新版本 : $latestVersion") +
-                        "\n(点击这里去下载页面)",
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+  Widget _buildAbout() {
+    return IconButton(
+      onPressed: () async {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const AboutScreen();
+          },
+        ));
       },
-    );
-  }
-
-  Widget _buildVersionText() {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Center(
-          child: SizedBox(
-            width: constraints.maxWidth - 30,
-            child: Center(
-              child: SelectableText(latestVersionInfo() ?? ""),
-            ),
-          ),
-        );
-      },
+      icon: const VersionBadged(child: Padding(padding: EdgeInsets.all(1), child: Icon(Icons.info_outlined))),
     );
   }
 }
