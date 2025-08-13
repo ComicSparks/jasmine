@@ -1,7 +1,5 @@
 <div align="center">
   <h1 align="center">
-    <img src="lib/assets/avatar.png" width="200">
-    <br/>
     Jasmine 
 
 [![license](https://img.shields.io/github/license/ComicSparks/jasmine)](https://raw.githubusercontent.com/ComicSparks/jasmine/master/LICENSE)

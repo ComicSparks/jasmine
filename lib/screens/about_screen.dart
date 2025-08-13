@@ -72,10 +72,7 @@ class _AboutState extends State<AboutScreen> {
                   padding: const EdgeInsets.all(10),
                   child: Opacity(
                     opacity: 0.9,
-                    child: Image.asset(
-                      "lib/assets/avatar.png",
-                      fit: BoxFit.contain,
-                    ),
+                    child: Icon(Icons.abc,size: l,),
                   ),
                 ),
               ),

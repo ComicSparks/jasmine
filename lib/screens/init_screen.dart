@@ -33,21 +33,8 @@ class _InitScreenState extends State<InitScreen> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          return Center(
-            child: SizedBox(
-              width: constraints.maxWidth * 0.9,
-              height: constraints.maxHeight * 0.9,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: Opacity(
-                  opacity: 0.8,
-                  child: Image.asset(
-                    "lib/assets/startup.png",
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
+          return const Center(
+            child: Text("initializing..."),
           );
         },
       ),
