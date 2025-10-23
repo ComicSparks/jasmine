@@ -105,6 +105,17 @@ class _DownloadsExportingScreen2State extends State<DownloadsExportingScreen2> {
           ),
         ),
         Container(height: 20),
+        MaterialButton(
+          onPressed: _exportEpub,
+          child: Text(
+            "导出成EPUB" + (!isPro ? "\n(发电后使用)" : ""),
+            style: TextStyle(
+              color: !isPro ? Colors.grey : null,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Container(height: 20),
       ],
     );
   }
@@ -173,6 +184,43 @@ class _DownloadsExportingScreen2State extends State<DownloadsExportingScreen2> {
             deleteExport,
           );
         }
+        exported = true;
+      } catch (err) {
+        e = err;
+        exportFail = true;
+      } finally {
+        setState(() {
+          exporting = false;
+        });
+      }
+    }
+  }
+
+  _exportEpub() async {
+    if (!isPro) {
+      defaultToast(context, "请先发电鸭");
+      return;
+    }
+    late String? path;
+    try {
+      path = Platform.isIOS
+          ? await methods.iosGetDocumentDir()
+          : await chooseFolder(context);
+    } catch (e) {
+      defaultToast(context, "$e");
+      return;
+    }
+    print("path $path");
+    if (path != null) {
+      try {
+        setState(() {
+          exporting = true;
+        });
+        await methods.export_jm_epub(
+          widget.idList,
+          path,
+          deleteExport,
+        );
         exported = true;
       } catch (err) {
         e = err;

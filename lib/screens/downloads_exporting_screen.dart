@@ -112,6 +112,11 @@ class _DownloadsExportingScreenState extends State<DownloadsExportingScreen> {
           Container(height: 20),
         ],
         Container(height: 20),
+        _buildButtonInner(
+          _exportEpubs,
+          "分别导出EPUB" + (!isPro ? "\n(发电后使用)" : ""),
+        ),
+        Container(height: 20),
       ],
     );
   }
@@ -339,6 +344,51 @@ class _DownloadsExportingScreenState extends State<DownloadsExportingScreen> {
               title: "导出重命名", src: ab?.album?.name ?? "");
         }
         await methods.export_jm_jpegs_zip_single(
+          value,
+          path,
+          rename,
+          deleteExport,
+        );
+      }
+      exported = true;
+    } catch (err) {
+      e = err;
+      exportFail = true;
+    } finally {
+      setState(() {
+        exporting = false;
+      });
+    }
+  }
+
+  _exportEpubs() async {
+    if (!isPro) {
+      defaultToast(context, "请先发电鸭");
+      return;
+    }
+    if (Platform.isMacOS) {
+      await chooseEx(context);
+    }
+    if (!await confirmDialog(
+        context, "导出确认", "将您所选的漫画分别导出EPUB${showExportPath()}")) {
+      return;
+    }
+    try {
+      setState(() {
+        exporting = true;
+      });
+      final path = await attachExportPath();
+      for (var value in widget.idList) {
+        var ab = await methods.downloadById(value);
+        setState(() {
+          exportMessage = "正在导出 : " + (ab?.album?.name ?? "");
+        });
+        String? rename;
+        if (currentExportRename()) {
+          rename = await displayTextInputDialog(context,
+              title: "导出重命名", src: ab?.album?.name ?? "");
+        }
+        await methods.export_jm_epub_single(
           value,
           path,
           rename,

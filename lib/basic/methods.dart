@@ -425,6 +425,24 @@ class Methods {
     });
   }
 
+  Future export_jm_epub(List<int> idList, String path, bool deleteExported) {
+    return _invoke("export_jm_epub", {
+      "comic_id": idList,
+      "dir": path,
+      "delete_exported": deleteExported,
+    });
+  }
+
+  Future export_jm_epub_single(
+      int id, String folder, String? rename, bool deleteExported) {
+    return _invoke("export_jm_epub_single", {
+      "id": id,
+      "folder": folder,
+      "rename": rename,
+      "delete_exported": deleteExported,
+    });
+  }
+
   Future import_jm_zip(String path) {
     print(path);
     return _invoke("import_jm_zip", path);
