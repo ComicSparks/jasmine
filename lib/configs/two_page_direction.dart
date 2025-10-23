@@ -58,7 +58,7 @@ Widget twoGalleryDirectionSetting(BuildContext context) {
           await chooseTwoPageDirection(context);
           setState(() {});
         },
-        title: const Text("小说阅读器类型"),
+        title: const Text("双页阅读器方向"),
         subtitle: Text(twoPageDirectionName(_twoPageDirection, context)),
       );
     },
