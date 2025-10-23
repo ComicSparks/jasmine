@@ -3,7 +3,7 @@ description: jasmine comic browser
 
 publish_to: 'none'
 
-version: 1.7.12+40
+version: 1.7.13+41
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
