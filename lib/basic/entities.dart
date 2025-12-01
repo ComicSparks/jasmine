@@ -1282,6 +1282,48 @@ class IsPro {
   }
 }
 
+class ProInfoAll {
+  late ProInfoAf proInfoAf;
+  late ProInfoPat proInfoPat;
+
+  ProInfoAll.fromJson(Map<String, dynamic> json) {
+    proInfoAf = ProInfoAf.fromJson(json["pro_info_af"]);
+    proInfoPat = ProInfoPat.fromJson(json["pro_info_pat"]);
+  }
+}
+
+class ProInfoAf {
+  late bool isPro;
+  late int expire;
+
+  ProInfoAf.fromJson(Map<String, dynamic> json) {
+    isPro = json["is_pro"];
+    expire = json["expire"];
+  }
+}
+
+class ProInfoPat {
+  late bool isPro;
+  late String patId;
+  late String bindUid;
+  late int requestDelete;
+  late int reBind;
+  late int errorType;
+  late String errorMsg;
+  late String accessKey;
+
+  ProInfoPat.fromJson(Map<String, dynamic> json) {
+    isPro = json["is_pro"];
+    patId = json["pat_id"] ?? "";
+    bindUid = json["bind_uid"] ?? "";
+    requestDelete = json["request_delete"] ?? 0;
+    reBind = json["re_bind"] ?? 0;
+    errorType = json["error_type"] ?? 0;
+    errorMsg = json["error_msg"] ?? "";
+    accessKey = json["access_key"] ?? "";
+  }
+}
+
 class WeekData {
   late List<WeekCategory> categories;
   late List<WeekType> types;

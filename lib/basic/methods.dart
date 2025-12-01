@@ -462,12 +462,35 @@ class Methods {
     return IsPro.fromJson(jsonDecode(await _invoke("is_pro", "")));
   }
 
+  Future<ProInfoAll> proInfoAll() async {
+    return ProInfoAll.fromJson(jsonDecode(await _invoke("pro_info_all", "")));
+  }
+
   Future reloadPro() {
     return _invoke("reload_pro", "");
   }
 
   Future inputCdKey(String cdKey) {
     return _invoke("input_cd_key", cdKey);
+  }
+
+  Future checkPat(String accessKey) {
+    return _invoke("check_pat", accessKey);
+  }
+
+  Future bindPatAccount(String accessKey, String username) {
+    return _invoke("bind_pat", jsonEncode({
+      "access_key": accessKey,
+      "username": username,
+    }));
+  }
+
+  Future reloadPatAccount() {
+    return _invoke("reload_pat_account", "");
+  }
+
+  Future clearPat() {
+    return _invoke("clear_pat", "");
   }
 
   Future<int> load_download_thread() async {
