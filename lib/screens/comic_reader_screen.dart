@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:another_xlider/another_xlider.dart';
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/methods.dart';
@@ -1185,17 +1186,29 @@ class _ComicReaderWebToonState extends _ComicReaderState {
 
 class _ComicReaderGalleryState extends _ComicReaderState {
   late PageController _pageController;
-  late PhotoViewGallery _gallery;
-  late List<ImageProvider> _imageProviders;
+  final Map<int, int> _reloadKeys = {}; // 跟踪每个页面的重新加载次数
 
   @override
   void initState() {
-    _imageProviders = [];
-    for (var image in widget.chapter.images) {
-      _imageProviders.add(PageImageProvider(widget.chapter.id, image));
-    }
     _pageController = PageController(initialPage: widget.startIndex);
-    _gallery = PhotoViewGallery.builder(
+    super.initState();
+    _preloadJump(widget.startIndex, init: true);
+  }
+
+  void _reloadImage(int index) {
+    if (mounted) {
+      // 清除图片缓存
+      final oldProvider = PageImageProvider(widget.chapter.id, widget.chapter.images[index]);
+      imageCache.evict(oldProvider);
+      print("evict ${widget.chapter.images[index]}");
+      setState(() {
+        _reloadKeys[index] = (_reloadKeys[index] ?? 0) + 1;
+      });
+    }
+  }
+
+  Widget _buildGallery() {
+    return PhotoViewGallery.builder(
       scrollDirection: widget.readerDirection == ReaderDirection.topToBottom
           ? Axis.vertical
           : Axis.horizontal,
@@ -1211,23 +1224,43 @@ class _ComicReaderGalleryState extends _ComicReaderState {
       itemCount: widget.chapter.images.length,
       allowImplicitScrolling: true,
       builder: (BuildContext context, int index) {
-        return PhotoViewGalleryPageOptions(
+        final reloadKey = _reloadKeys[index] ?? 0;
+        final imageProvider = PageImageProvider(widget.chapter.id, widget.chapter.images[index]);
+        
+        return PhotoViewGalleryPageOptions.customChild(
           disableGestures: currentReaderControllerType == ReaderControllerType.touchDouble || currentReaderControllerType == ReaderControllerType.touchDoubleOnceNext,
-          filterQuality: FilterQuality.high,
-          imageProvider: _imageProviders[index],
-          errorBuilder: (b, e, s) {
-            print("$e,$s");
-            return LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return buildError(context, constraints.maxWidth, constraints.maxHeight);
-              },
-            );
-          },
+          child: LayoutBuilder(
+            key: ValueKey('page_${widget.chapter.id}_${widget.chapter.images[index]}_$reloadKey'),
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Image(
+                key: ValueKey('image_${widget.chapter.id}_${widget.chapter.images[index]}_$reloadKey'),
+                image: imageProvider,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return buildLoading(
+                    context,
+                    constraints.maxWidth,
+                    constraints.maxHeight,
+                  );
+                },
+                errorBuilder: (b, e, s) {
+                  print("$e,$s");
+                  return buildError(
+                    context,
+                    constraints.maxWidth,
+                    constraints.maxHeight,
+                    onReload: () => _reloadImage(index),
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );
-    super.initState();
-    _preloadJump(widget.startIndex, init: true);
   }
 
   @override
@@ -1244,7 +1277,7 @@ class _ComicReaderGalleryState extends _ComicReaderState {
         Expanded(
           child: Stack(
             children: [
-              _gallery,
+              _buildGallery(),
               _buildNextEpController(),
             ],
           ),
@@ -1271,8 +1304,8 @@ class _ComicReaderGalleryState extends _ComicReaderState {
   void _onGalleryPageChange(int to) {
     var toIndex = to * 2;
     // 提前加载
-    for (var i = toIndex + 1; i < toIndex + 3 && i < _imageProviders.length; i++) {
-      final ip = _imageProviders[i];
+    for (var i = toIndex + 1; i < toIndex + 3 && i < widget.chapter.images.length; i++) {
+      final ip = PageImageProvider(widget.chapter.id, widget.chapter.images[i]);
       precacheImage(ip, context);
     }
     // 提前加载
@@ -1282,8 +1315,8 @@ class _ComicReaderGalleryState extends _ComicReaderState {
   _preloadJump(int index, {bool init = false}) {
     fn() {
       for (var i = index - 1; i < index + 3; i++) {
-        if (i < 0 || i >= _imageProviders.length) continue;
-        final ip = _imageProviders[i];
+        if (i < 0 || i >= widget.chapter.images.length) continue;
+        final ip = PageImageProvider(widget.chapter.id, widget.chapter.images[i]);
         precacheImage(ip, context);
       }
     }
@@ -1518,6 +1551,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
   List<ImageProvider> ips = [];
   List<PhotoViewGalleryPageOptions> options = [];
   late PhotoViewGallery _view;
+  final Map<int, int> _imageProviderKeys = {};
 
   @override
   void initState() {
@@ -1528,29 +1562,57 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
     super.initState();
     _pageController = PageController(initialPage: widget.startIndex ~/ 2);
     for (var index = 0; index < widget.chapter.images.length; index++) {
-      var item = widget.chapter.images[index];
-      late ImageProvider ip;
+      _imageProviderKeys[index] = 0;
       ips.add(PageImageProvider(
         widget.chapter.id,
         widget.chapter.images[index],
       ));
     }
+    _buildOptions();
+    _buildView();
+    _preloadJump(widget.startIndex, init: true);
+  }
+
+  void _buildView() {
+    _view = PhotoViewGallery(
+      pageController: _pageController,
+      pageOptions: options,
+      scrollDirection: widget.readerDirection == ReaderDirection.topToBottom
+          ? Axis.vertical
+          : Axis.horizontal,
+      reverse: widget.readerDirection == ReaderDirection.rightToLeft,
+      onPageChanged: _onGalleryPageChange,
+      backgroundDecoration: BoxDecoration(color: Colors.black),
+    );
+  }
+
+  void _buildOptions() {
+    options.clear();
     for (var index = 0; index < ips.length; index += 2) {
       // 两页
       late ImageProvider leftIp = ips[index];
       late ImageProvider rightIp = ips[index + 1];
+      late int leftIndex = index;
+      late int rightIndex = index + 1;
       if (index + 1 < ips.length) {
         leftIp = ips[index];
         rightIp = ips[index + 1];
+        leftIndex = index;
+        rightIndex = index + 1;
       } else {
         leftIp = ips[index];
         // ImageProvider by color black
         rightIp = const AssetImage('lib/assets/0.png');
+        leftIndex = index;
+        rightIndex = -1; // 表示右侧是占位图
       }
       if (currentTwoPageDirection == TwoPageDirection.rightToLeft) {
         final temp = leftIp;
+        final tempIndex = leftIndex;
         leftIp = rightIp;
+        leftIndex = rightIndex;
         rightIp = temp;
+        rightIndex = tempIndex;
       }
       options.add(
         PhotoViewGalleryPageOptions.customChild(
@@ -1563,15 +1625,26 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: Image(
+                        key: leftIndex >= 0 ? ValueKey(_imageProviderKeys[leftIndex]) : null,
                         image: leftIp,
                         fit: BoxFit.contain,
-                        // loadingBuilder: (context, child, event) => buildLoading(constraints.maxWidth, constraints.maxHeight),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return buildLoading(
+                            context,
+                            constraints.maxWidth / 2,
+                            constraints.maxHeight / 2,
+                          );
+                        },
                         errorBuilder: (b, e, s) {
                           print("$e,$s");
                           return buildError(
                             context,
                             constraints.maxWidth / 2,
                             constraints.maxHeight / 2,
+                            onReload: leftIndex >= 0 ? () => _reloadImage(leftIndex) : null,
                           );
                         },
                       ),
@@ -1581,15 +1654,26 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Image(
+                        key: rightIndex >= 0 ? ValueKey(_imageProviderKeys[rightIndex]) : null,
                         image: rightIp,
                         fit: BoxFit.contain,
-                        // loadingBuilder: (context, child, event) => buildLoading(constraints.maxWidth, constraints.maxHeight),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return buildLoading(
+                            context,
+                            constraints.maxWidth / 2,
+                            constraints.maxHeight / 2,
+                          );
+                        },
                         errorBuilder: (b, e, s) {
                           print("$e,$s");
                           return buildError(
                             context,
                             constraints.maxWidth / 2,
                             constraints.maxHeight / 2,
+                            onReload: rightIndex >= 0 ? () => _reloadImage(rightIndex) : null,
                           );
                         },
                       ),
@@ -1602,17 +1686,20 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
         ),
       );
     }
-    _view = PhotoViewGallery(
-      pageController: _pageController,
-      pageOptions: options,
-      scrollDirection: widget.readerDirection == ReaderDirection.topToBottom
-          ? Axis.vertical
-          : Axis.horizontal,
-      reverse: widget.readerDirection == ReaderDirection.rightToLeft,
-      onPageChanged: _onGalleryPageChange,
-      backgroundDecoration: BoxDecoration(color: Colors.black),
-    );
-    _preloadJump(widget.startIndex, init: true);
+  }
+
+  void _reloadImage(int index) {
+    if (mounted) {
+      setState(() {
+        _imageProviderKeys[index] = (_imageProviderKeys[index] ?? 0) + 1;
+        // 清除图片缓存
+        imageCache.evict(ips[index]);
+        ips[index] = PageImageProvider(widget.chapter.id, widget.chapter.images[index]);
+        _buildOptions();
+        // 只重新构建 view，不改变整个组件的 key
+        _buildView();
+      });
+    }
   }
 
   @override
