@@ -15,6 +15,7 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   int _folderId = 0;
+  bool _isLoading = true;
 
   final Map<int, String> _folderMap = {
     0: "全部",
@@ -49,6 +50,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       setState(() {
         _sort = f;
       });
+      await methods.saveProperty("favorites_sort", f);
     }
   }
 
@@ -62,7 +64,29 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         defaultToast(context, "$e");
       }
     }
+    _loadSort();
     super.initState();
+  }
+
+  Future<void> _loadSort() async {
+    try {
+      final sort = await methods.loadProperty("favorites_sort");
+      if (sort.isNotEmpty && _sortNameMap.containsKey(sort)) {
+        setState(() {
+          _sort = sort;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // 使用默认值
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -97,7 +121,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ],
       ),
-      body: ComicPager(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ComicPager(
         key: Key("FAVOUR:$_folderId:$_sort"),
         onPage: (int page) async {
           final response = await methods.favorites(_folderId, page, _sort);
