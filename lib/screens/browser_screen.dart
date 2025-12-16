@@ -153,6 +153,9 @@ class _BrowserScreenState extends State<BrowserScreen>
           AsyncSnapshot<CategoriesResponse> snapshot,
         ) {
           final categories = snapshot.requireData.categories;
+          if (_slug.isEmpty && categories.isNotEmpty) {
+            _slug = categories[0].slug;
+          }
           return Column(children: [
             SizedBox(
               height: 56,
