@@ -105,6 +105,8 @@ class _SettingsState extends State<SettingsScreen> {
                 webDavUserNameSetting(),
                 webDavPasswordSetting(),
                 webDavSyncClick(context),
+                webDavSyncUploadClick(context),
+                webDavSyncDownloadClick(context),
                 const Divider(),
               ],
             ),

@@ -23,6 +23,36 @@ Future webDavSync(BuildContext context) async {
   }
 }
 
+Future webDavSyncUpload(BuildContext context) async {
+  try {
+    await methods.webDavSync({
+      "url": currentWebDavUrl,
+      "username": currentWebUserName,
+      "password": currentWebDavPassword,
+      "direction": "Upload",
+    });
+    defaultToast(context, "WebDav 覆盖上传成功");
+  } catch (e, s) {
+    print("$e\n$s");
+    defaultToast(context, "WebDav 覆盖上传失败 : $e");
+  }
+}
+
+Future webDavSyncDownload(BuildContext context) async {
+  try {
+    await methods.webDavSync({
+      "url": currentWebDavUrl,
+      "username": currentWebUserName,
+      "password": currentWebDavPassword,
+      "direction": "Download",
+    });
+    defaultToast(context, "WebDav 覆盖下载成功");
+  } catch (e, s) {
+    print("$e\n$s");
+    defaultToast(context, "WebDav 覆盖下载失败 : $e");
+  }
+}
+
 Future webDavSyncAuto(BuildContext context) async {
   if (currentWebDavSyncSwitch() && isPro) {
     await webDavSync(context);
@@ -39,6 +69,36 @@ Widget webDavSyncClick(BuildContext context) {
       syncing = true;
       try {
         await webDavSync(context);
+      } finally {
+        syncing = false;
+      }
+    },
+  );
+}
+
+Widget webDavSyncUploadClick(BuildContext context) {
+  return ListTile(
+    title: const Text("单向覆盖上传"),
+    onTap: () async {
+      if (syncing) return;
+      syncing = true;
+      try {
+        await webDavSyncUpload(context);
+      } finally {
+        syncing = false;
+      }
+    },
+  );
+}
+
+Widget webDavSyncDownloadClick(BuildContext context) {
+  return ListTile(
+    title: const Text("单向覆盖下载"),
+    onTap: () async {
+      if (syncing) return;
+      syncing = true;
+      try {
+        await webDavSyncDownload(context);
       } finally {
         syncing = false;
       }
