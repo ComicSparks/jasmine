@@ -68,6 +68,20 @@ target_link_libraries(flutter INTERFACE
 )
 add_dependencies(flutter flutter_assemble)
 
+# Some projects may have stale/partial generated config that doesn't set
+# FLUTTER_TARGET_PLATFORM, which causes tool_backend.dart to crash due to
+# missing arguments. Provide a sensible default based on architecture.
+if(NOT FLUTTER_TARGET_PLATFORM)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64)$")
+    set(FLUTTER_TARGET_PLATFORM "linux-x64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+    set(FLUTTER_TARGET_PLATFORM "linux-arm64")
+  else()
+    message(WARNING "FLUTTER_TARGET_PLATFORM was not set; defaulting to linux-x64 for processor: ${CMAKE_SYSTEM_PROCESSOR}")
+    set(FLUTTER_TARGET_PLATFORM "linux-x64")
+  endif()
+endif()
+
 # === Flutter tool backend ===
 # _phony_ is a non-existent file to force this command to run every time,
 # since currently there's no way to get a full input/output list from the

@@ -69,6 +69,7 @@ target/
 linux/librust.a
 linux/rust.h
 linux/rust1.h
+linux/build/
 
 tests_data/
 

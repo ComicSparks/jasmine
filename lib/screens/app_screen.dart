@@ -86,19 +86,16 @@ class _AppScreenState extends State<AppScreen> {
           },
           children: _screens.map((e) => e.screen).toList(),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: _screens
-              .map((e) => BottomNavigationBarItem(
-                    label: e.title,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
+          destinations: _screens
+              .map((e) => NavigationDestination(
                     icon: e.icon,
-                    activeIcon: e.activeIcon,
+                    selectedIcon: e.activeIcon,
+                    label: e.title,
                   ))
               .toList(),
-          currentIndex: _selectedIndex,
-          iconSize: 20,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          onTap: _onItemTapped,
         ),
       ),
     );

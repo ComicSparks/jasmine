@@ -8,7 +8,7 @@ import '../basic/commons.dart';
 import '../basic/methods.dart';
 
 const _propertyName = "usingRightClickPop";
-late bool _usingRightClickPop;
+bool _usingRightClickPop = false;
 
 Future<void> initUsingRightClickPop() async {
   _usingRightClickPop =

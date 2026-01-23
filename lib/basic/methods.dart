@@ -17,15 +17,16 @@ class Methods {
 
   Future<String> _invoke(String method, dynamic params) async {
     late String resp;
-    if (Platform.isLinux) {
-      var req = await httpClient.post("127.0.0.1", 52764, "invoke");
-      req.add(utf8.encode(jsonEncode({
-        "method": method,
-        "params": params is String ? params : jsonEncode(params),
-      })));
-      var rsp = await req.close();
-      resp = await rsp.transform(utf8.decoder).join();
-    } else {
+    // if (Platform.isLinux) {
+    //   var req = await httpClient.post("127.0.0.1", 52764, "invoke");
+    //   req.add(utf8.encode(jsonEncode({
+    //     "method": method,
+    //     "params": params is String ? params : jsonEncode(params),
+    //   })));
+    //   var rsp = await req.close();
+    //   resp = await rsp.transform(utf8.decoder).join();
+    // } else
+     {
       resp = await _channel.invokeMethod(
           "invoke",
           jsonEncode({

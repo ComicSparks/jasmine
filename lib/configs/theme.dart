@@ -5,81 +5,21 @@ import 'package:flutter/services.dart';
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 
-final _lightTheme = ThemeData.light().copyWith(
-  useMaterial3: true,
-  colorScheme: const ColorScheme(
-    brightness: Brightness.light,
-    primary: Color(0xFF0062A1),
-    onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFD0E4FF),
-    onPrimaryContainer: Color(0xFF001D35),
-    secondary: Color(0xFF984061),
-    onSecondary: Color(0xFFFFFFFF),
-    secondaryContainer: Color(0xFFFFD9E2),
-    onSecondaryContainer: Color(0xFF3E001D),
-    tertiary: Color(0xFF9A4523),
-    onTertiary: Color(0xFFFFFFFF),
-    tertiaryContainer: Color(0xFFFFDBCF),
-    onTertiaryContainer: Color(0xFF380D00),
-    error: Color(0xFFBA1A1A),
-    errorContainer: Color(0xFFFFDAD6),
-    onError: Color(0xFFFFFFFF),
-    onErrorContainer: Color(0xFF410002),
-    background: Color(0xFFFDFCFF),
-    onBackground: Color(0xFF1A1C1E),
-    surface: Color(0xFFFDFCFF),
-    onSurface: Color(0xFF1A1C1E),
-    surfaceVariant: Color(0xFFDFE3EB),
-    onSurfaceVariant: Color(0xFF42474E),
-    outline: Color(0xFF73777F),
-    onInverseSurface: Color(0xFFF1F0F4),
-    inverseSurface: Color(0xFF2F3033),
-    inversePrimary: Color(0xFF9CCAFF),
-    shadow: Color(0xFF000000),
-    surfaceTint: Color(0xFF0062A1),
-    outlineVariant: Color(0xFFC2C7CF),
-    scrim: Color(0xFF000000),
-  ),
+const _seedColor = Color(0xFF6750A4);
+
+final ColorScheme _lightColorScheme = ColorScheme.fromSeed(
+  seedColor: _seedColor,
+  brightness: Brightness.light,
 );
 
-final _darkTheme = ThemeData.dark().copyWith(
-  useMaterial3: true,
-  scaffoldBackgroundColor: Color(0xFF1C1B1E),
-  dialogBackgroundColor: Color(0xFF1C1B1E),
-  colorScheme: const ColorScheme(
-    brightness: Brightness.dark,
-    primary: Color(0xFFCFBCFF),
-    onPrimary: Color(0xFF381E72),
-    primaryContainer: Color(0xFF4F378A),
-    onPrimaryContainer: Color(0xFFE9DDFF),
-    secondary: Color(0xFFCBC2DB),
-    onSecondary: Color(0xFF332D41),
-    secondaryContainer: Color(0xFF4A4458),
-    onSecondaryContainer: Color(0xFFE8DEF8),
-    tertiary: Color(0xFFFFB873),
-    onTertiary: Color(0xFF4B2800),
-    tertiaryContainer: Color(0xFF6A3B00),
-    onTertiaryContainer: Color(0xFFFFDCBF),
-    error: Color(0xFFFFB4AB),
-    errorContainer: Color(0xFF93000A),
-    onError: Color(0xFF690005),
-    onErrorContainer: Color(0xFFFFDAD6),
-    background: Color(0xFF1C1B1E),
-    onBackground: Color(0xFFE6E1E6),
-    surface: Color(0xFF1C1B1E),
-    onSurface: Color(0xFFE6E1E6),
-    surfaceVariant: Color(0xFF49454E),
-    onSurfaceVariant: Color(0xFFCAC4CF),
-    outline: Color(0xFF948F99),
-    onInverseSurface: Color(0xFF1C1B1E),
-    inverseSurface: Color(0xFFE6E1E6),
-    inversePrimary: Color(0xFF6750A4),
-    shadow: Color(0xFF000000),
-    surfaceTint: Color(0xFFCFBCFF),
-    outlineVariant: Color(0xFF49454E),
-    scrim: Color(0xFF000000),
-  ),
+final ColorScheme _darkColorScheme = ColorScheme.fromSeed(
+  seedColor: _seedColor,
+  brightness: Brightness.dark,
 );
+
+final ThemeData _lightTheme =
+    _buildAppTheme(_lightColorScheme, Brightness.light);
+final ThemeData _darkTheme = _buildAppTheme(_darkColorScheme, Brightness.dark);
 
 ThemeData get lightTheme => theme != "2" ? _lightTheme : _darkTheme;
 
@@ -93,6 +33,171 @@ Map<String, String> _nameMap = {
   "1": "保持亮色",
   "2": "保持暗色",
 };
+
+ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
+  final typography = Typography.material2021();
+  final textTheme =
+      brightness == Brightness.light ? typography.black : typography.white;
+  final navLabelStyle = (textTheme.labelSmall ??
+          const TextStyle(fontSize: 11, fontWeight: FontWeight.w600))
+      .copyWith(fontWeight: FontWeight.w600);
+
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme: scheme,
+    typography: typography,
+    textTheme: textTheme,
+    primaryTextTheme: textTheme,
+    scaffoldBackgroundColor: scheme.background,
+    dialogBackgroundColor: scheme.surface,
+    appBarTheme: AppBarTheme(
+      backgroundColor: scheme.surface,
+      surfaceTintColor: scheme.surfaceTint,
+      foregroundColor: scheme.onSurface,
+      elevation: 1,
+      centerTitle: true,
+      titleTextStyle:
+          textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+    ),
+    bottomAppBarTheme: BottomAppBarTheme(
+      color: scheme.surface,
+      elevation: 1,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: scheme.surface,
+      surfaceTintColor: scheme.surfaceTint,
+      indicatorColor: scheme.primaryContainer,
+      elevation: 3,
+      height: 70,
+      labelTextStyle: MaterialStatePropertyAll(navLabelStyle),
+      iconTheme: MaterialStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(MaterialState.selected)
+              ? scheme.primary
+              : scheme.onSurfaceVariant,
+        ),
+      ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: scheme.primary,
+      foregroundColor: scheme.onPrimary,
+      elevation: 4,
+    ),
+    cardTheme: CardTheme(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      surfaceTintColor: scheme.surfaceTint,
+    ),
+    dialogTheme: DialogTheme(
+      backgroundColor: scheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      titleTextStyle:
+          textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+      contentTextStyle: textTheme.bodyMedium,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: scheme.surfaceVariant,
+      contentTextStyle: textTheme.bodyMedium
+          ?.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w500),
+      behavior: SnackBarBehavior.floating,
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: scheme.surfaceVariant,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: scheme.outline),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: scheme.outlineVariant),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: scheme.primary),
+      ),
+      labelStyle:
+          textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: MaterialStatePropertyAll(scheme.secondary),
+        foregroundColor: MaterialStatePropertyAll(scheme.onSecondary),
+        shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        textStyle: MaterialStatePropertyAll(
+          (textTheme.labelLarge ?? const TextStyle(fontWeight: FontWeight.w600))
+              .copyWith(fontWeight: FontWeight.w600),
+        ),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: MaterialStatePropertyAll(scheme.primary),
+        foregroundColor: MaterialStatePropertyAll(scheme.onPrimary),
+        shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        textStyle: MaterialStatePropertyAll(
+          (textTheme.labelLarge ?? const TextStyle(fontWeight: FontWeight.w600))
+              .copyWith(fontWeight: FontWeight.w600),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: MaterialStatePropertyAll(scheme.primary),
+        shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        overlayColor: MaterialStatePropertyAll(scheme.primary.withOpacity(.12)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: MaterialStatePropertyAll(scheme.primary),
+        textStyle: MaterialStatePropertyAll(
+          textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        ),
+      ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: scheme.surfaceVariant,
+      selectedColor: scheme.secondaryContainer,
+      secondarySelectedColor: scheme.primaryContainer,
+      labelStyle: textTheme.bodyMedium,
+      secondaryLabelStyle:
+          textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    sliderTheme: SliderThemeData(
+      activeTrackColor: scheme.primary,
+      inactiveTrackColor: scheme.onSurface.withOpacity(.2),
+      thumbColor: scheme.primary,
+      overlayColor: scheme.primary.withOpacity(.16),
+      trackHeight: 3,
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: MaterialStatePropertyAll(scheme.primary),
+      trackColor: MaterialStatePropertyAll(scheme.primary.withOpacity(.5)),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: MaterialStatePropertyAll(scheme.primary),
+      checkColor: MaterialStatePropertyAll(scheme.onPrimary),
+    ),
+    radioTheme: RadioThemeData(
+      fillColor: MaterialStatePropertyAll(scheme.primary),
+    ),
+    dividerTheme: DividerThemeData(
+      color: scheme.outlineVariant,
+      thickness: 0.8,
+    ),
+  );
+}
 
 Future initTheme() async {
   SystemChrome.setEnabledSystemUIMode(
@@ -123,11 +228,11 @@ Future chooseTheme(BuildContext context) async {
   }
 }
 
-reloadBarColor({bool op = false}) {
+void reloadBarColor({bool op = false}) {
   _reloadBarColor(op: op);
 }
 
-_reloadBarColor({bool op = false}) {
+void _reloadBarColor({bool op = false}) {
   if (op) {
     switch (theme) {
       case '0':

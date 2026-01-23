@@ -207,6 +207,7 @@ class _FloatingSearchBarScreenState extends State<FloatingSearchBarScreen>
         focusedBorder: InputBorder.none,
         disabledBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
+        fillColor: Colors.transparent,
       ),
     );
   }
