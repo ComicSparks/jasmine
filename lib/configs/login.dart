@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/is_pro.dart';
@@ -169,6 +170,146 @@ Future loginDialog(BuildContext context) async {
       );
     },
   );
+}
+
+Future showLoginAgreementBottomSheet(BuildContext context) async {
+  await showMaterialModalBottomSheet(
+    context: context,
+    backgroundColor: const Color(0xAA000000),
+    builder: (context) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * (.6),
+        child: const _LoginAgreementSheet(),
+      );
+    },
+  );
+}
+
+class LoginAgreementHint extends StatelessWidget {
+  final EdgeInsetsGeometry padding;
+
+  const LoginAgreementHint({
+    super.key,
+    this.padding = const EdgeInsets.fromLTRB(16, 0, 16, 8),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final agreeStyle =
+        Theme.of(context).textTheme.bodyMedium
+    //        ?.copyWith(color: Colors.grey)
+    ;
+    final agreeLinkStyle = agreeStyle?.copyWith(
+      decoration: TextDecoration.underline,
+      // decorationColor: Colors.grey.shade600,
+      // color: Colors.grey.shade600,
+    );
+    return Padding(
+      padding: padding,
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text("登录即为同意 ", style: agreeStyle),
+          InkWell(
+            onTap: () => showLoginAgreementBottomSheet(context),
+            child: Text("使用协议", style: agreeLinkStyle),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoginAgreementSheet extends StatelessWidget {
+  const _LoginAgreementSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final bodyStyle = textTheme.bodyMedium;
+    final captionStyle = textTheme.bodySmall?.copyWith(color: Colors.grey);
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                ),
+                Expanded(
+                  child: Text(
+                    "使用协议",
+                    style: textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 48),
+              ],
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                children: [
+                  Text(
+                    "继续登录/使用即表示您已阅读并同意以下内容：",
+                    style: bodyStyle,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "1. 为保障安全与改进服务，您的登录、浏览、搜索、下载等操作记录（含必要的设备与网络信息）可能会被供应商或服务器保存与分析。",
+                    style: bodyStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "2. 请勿上传、传播或利用本服务从事任何违法违规行为；如涉及敏感内容，请自行审慎判断并遵守当地法律法规。；因此产生的后果由您自行承担。",
+                    style: bodyStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "3. 本应用展示的任何信息仅供参考与交流，不构成医疗/诊断/治疗建议；因此产生的后果（含生理、病理等）由您自行承担。",
+                    style: bodyStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "4. 我们可能在必要时更新协议内容；更新后继续使用视为您接受更新。",
+                    style: bodyStyle,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "* 若您不同意上述条款，请停止登录并退出使用。",
+                    // style: captionStyle,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: MaterialButton(
+                  color: Colors.orange.shade700,
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      "我知道了",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _LoginDialog extends StatefulWidget {

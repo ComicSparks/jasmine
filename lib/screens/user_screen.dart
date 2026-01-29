@@ -78,8 +78,7 @@ class _UserScreenState extends State<UserScreen>
             ),
           ),
         _buildSettingsIcon(),
-        if (normalPlatform)
-        _buildAboutIcon(),
+        if (normalPlatform) _buildAboutIcon(),
       ]),
       body: SafeArea(
         child: ListView(
@@ -111,7 +110,13 @@ class _UserScreenState extends State<UserScreen>
     late Widget child;
     switch (loginStatus) {
       case LoginStatus.notSet:
-        child = _buildLoginButton("登录 / 注册");
+        child = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLoginButton("登录 / 注册"),
+            const SizedBox(height: 8),
+          ],
+        );
         break;
       case LoginStatus.logging:
         child = _buildLoginLoading();
@@ -120,11 +125,15 @@ class _UserScreenState extends State<UserScreen>
         child = _buildSelfInfoCard();
         break;
       case LoginStatus.loginField:
-        child = Column(children: [
-          _buildLoginButton("登录失败/点击重试"),
-          Container(height: 10),
-          _buildLoginErrorButton(),
-        ]);
+        child = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLoginButton("登录失败/点击重试"),
+            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+            _buildLoginErrorButton(),
+          ],
+        );
         break;
     }
     return Container(
@@ -226,8 +235,9 @@ class _UserScreenState extends State<UserScreen>
     final brightness = Theme.of(context).brightness;
     final statusColor =
         brightness == Brightness.light ? Colors.black54 : Colors.white70;
-    final statusStyle = (Theme.of(context).textTheme.bodySmall ?? const TextStyle())
-        .copyWith(fontSize: 12, color: statusColor);
+    final statusStyle =
+        (Theme.of(context).textTheme.bodySmall ?? const TextStyle())
+            .copyWith(fontSize: 12, color: statusColor);
     return Column(
       children: [
         Expanded(child: Container()),

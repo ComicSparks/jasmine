@@ -127,7 +127,12 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
         _passwordField(),
         apiHostSetting(),
         cdnHostSetting(),
-        const Divider(),
+        Container(
+          padding: const EdgeInsets.all(15),
+          child: const LoginAgreementHint(
+            padding: EdgeInsets.zero,
+          ),
+        ),
       ],
     );
   }
