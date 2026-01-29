@@ -41,7 +41,6 @@ Future initLogin(BuildContext context) async {
     } else if (preLogin.preLogin) {
       _selfInfo = preLogin.selfInfo!;
       _loginState = LoginStatus.loginSuccess;
-      daily(context);
       fav(context);
     } else {
       _loginState = LoginStatus.loginField;
@@ -51,18 +50,6 @@ Future initLogin(BuildContext context) async {
     _loginState = LoginStatus.loginField;
   } finally {
     reloadIsPro();
-  }
-}
-
-Future daily(BuildContext context) async {
-  try {
-    String msg = await methods.daily(selfInfo.uid);
-    if (msg.isNotEmpty) {
-      defaultToast(context, msg);
-    }
-  } catch (e, st) {
-    print("$e\n$st");
-    defaultToast(context, "$e");
   }
 }
 
@@ -160,7 +147,6 @@ Future login(String username, String password, BuildContext context) async {
     final selfInfo = await methods.login(username, password);
     _selfInfo = selfInfo;
     _loginState = LoginStatus.loginSuccess;
-    daily(context);
     fav(context);
   } catch (e, st) {
     print("$e\n$st");

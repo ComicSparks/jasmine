@@ -83,3 +83,5 @@ tests_data/
 
 # FVM Version Cache
 .fvm/
+
+*.db

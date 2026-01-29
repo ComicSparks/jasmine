@@ -10,6 +10,7 @@ import 'package:jasmine/screens/settings_screen.dart';
 import 'package:jasmine/screens/view_log_screen.dart';
 
 import '../basic/platform.dart';
+import '../configs/daily_sign.dart';
 import '../configs/is_pro.dart';
 import 'components/badge.dart';
 import 'downloads_screen.dart';
@@ -31,6 +32,7 @@ class _UserScreenState extends State<UserScreen>
   void initState() {
     loginEvent.subscribe(_setState);
     proEvent.subscribe(_setState);
+    dailySignEvent.subscribe(_setState);
     super.initState();
   }
 
@@ -38,6 +40,7 @@ class _UserScreenState extends State<UserScreen>
   void dispose() {
     loginEvent.unsubscribe(_setState);
     proEvent.unsubscribe(_setState);
+    dailySignEvent.unsubscribe(_setState);
     super.dispose();
   }
 
@@ -220,6 +223,11 @@ class _UserScreenState extends State<UserScreen>
   }
 
   Widget _buildSelfInfoCard() {
+    final brightness = Theme.of(context).brightness;
+    final statusColor =
+        brightness == Brightness.light ? Colors.black54 : Colors.white70;
+    final statusStyle = (Theme.of(context).textTheme.bodySmall ?? const TextStyle())
+        .copyWith(fontSize: 12, color: statusColor);
     return Column(
       children: [
         Expanded(child: Container()),
@@ -228,13 +236,28 @@ class _UserScreenState extends State<UserScreen>
         ),
         Container(height: 10),
         Center(
-          child: Text(
-            selfInfo.username,
-            style: TextStyle(
-              color: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black87
-                  : Colors.white,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                selfInfo.username,
+                style: TextStyle(
+                  color: brightness == Brightness.light
+                      ? Colors.black87
+                      : Colors.white,
+                ),
+              ),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () async {
+                  await checkDailySignStatus(context, toast: true);
+                },
+                child: Text(
+                  dailySignStatusLabel(),
+                  style: statusStyle,
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(child: Container()),
