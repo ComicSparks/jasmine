@@ -26,7 +26,7 @@ class Methods {
     //   var rsp = await req.close();
     //   resp = await rsp.transform(utf8.decoder).join();
     // } else
-     {
+    {
       resp = await _channel.invokeMethod(
           "invoke",
           jsonEncode({
@@ -44,6 +44,15 @@ class Methods {
 
   Future init() {
     return _invoke("init_dart", "");
+  }
+
+  Future<Map<String, String>> configLinks() async {
+    final rsp = await _invoke("config_links", "");
+    final decoded = jsonDecode(rsp);
+    if (decoded is! Map) {
+      return {};
+    }
+    return decoded.map((key, value) => MapEntry("$key", "$value"));
   }
 
   Future<String> loadProperty(String propertyKey) {
@@ -480,10 +489,12 @@ class Methods {
   }
 
   Future bindPatAccount(String accessKey, String username) {
-    return _invoke("bind_pat", jsonEncode({
-      "access_key": accessKey,
-      "username": username,
-    }));
+    return _invoke(
+        "bind_pat",
+        jsonEncode({
+          "access_key": accessKey,
+          "username": username,
+        }));
   }
 
   Future reloadPatAccount() {

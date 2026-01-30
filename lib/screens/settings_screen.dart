@@ -15,6 +15,7 @@ import '../configs/android_display_mode.dart';
 import '../configs/categories_sort.dart';
 import '../configs/display_jmcode.dart';
 import '../configs/download_and_export_to.dart';
+import '../configs/disable_recommend_content.dart';
 import '../configs/export_rename.dart';
 import '../configs/ignore_upgrade_pop.dart';
 import '../configs/ignore_view_log.dart';
@@ -115,6 +116,8 @@ class _SettingsState extends State<SettingsScreen> {
               title: Text('系统和应用程序'),
               children: [
                 if (isPro) ...[
+                  disableRecommendContentSetting(),
+                  const Divider(),
                   autoUpdateCheckSetting(),
                   ignoreUpgradePopSetting(),
                   const Divider(),

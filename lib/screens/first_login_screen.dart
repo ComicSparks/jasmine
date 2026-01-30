@@ -9,6 +9,7 @@ import '../configs/login.dart';
 import '../configs/network_api_host.dart';
 import '../configs/network_cdn_host.dart';
 import 'app_screen.dart';
+import 'components/recommend_links_panel.dart';
 
 const firstLoginScreen = FirstLoginScreen();
 
@@ -133,6 +134,7 @@ class _FirstLoginScreenState extends State<FirstLoginScreen> {
             padding: EdgeInsets.zero,
           ),
         ),
+        const RecommendLinksPanel(),
       ],
     );
   }

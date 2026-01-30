@@ -195,10 +195,9 @@ class LoginAgreementHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final agreeStyle =
-        Theme.of(context).textTheme.bodyMedium
-    //        ?.copyWith(color: Colors.grey)
-    ;
+    final agreeStyle = Theme.of(context).textTheme.bodyMedium
+        //        ?.copyWith(color: Colors.grey)
+        ;
     final agreeLinkStyle = agreeStyle?.copyWith(
       decoration: TextDecoration.underline,
       // decorationColor: Colors.grey.shade600,
