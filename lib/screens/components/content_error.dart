@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/log.dart';
 import 'error_types.dart';
-
 
 class ContentError extends StatelessWidget {
   final Object? error;
@@ -43,8 +43,8 @@ class ContentError extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        print("$error");
-        print("$stackTrace");
+        debugPrient("$error");
+        debugPrient("$stackTrace");
         var width = constraints.maxWidth;
         var height = constraints.maxHeight;
         var min = width < height ? width : height;

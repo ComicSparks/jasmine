@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/web_dav_url.dart';
 
@@ -18,7 +19,7 @@ Future webDavSync(BuildContext context) async {
     });
     defaultToast(context, "WebDav 同步成功");
   } catch (e, s) {
-    print("$e\n$s");
+    debugPrient("$e\n$s");
     defaultToast(context, "WebDav 同步失败 : $e");
   }
 }
@@ -33,7 +34,7 @@ Future webDavSyncUpload(BuildContext context) async {
     });
     defaultToast(context, "WebDav 覆盖上传成功");
   } catch (e, s) {
-    print("$e\n$s");
+    debugPrient("$e\n$s");
     defaultToast(context, "WebDav 覆盖上传失败 : $e");
   }
 }
@@ -48,7 +49,7 @@ Future webDavSyncDownload(BuildContext context) async {
     });
     defaultToast(context, "WebDav 覆盖下载成功");
   } catch (e, s) {
-    print("$e\n$s");
+    debugPrient("$e\n$s");
     defaultToast(context, "WebDav 覆盖下载失败 : $e");
   }
 }

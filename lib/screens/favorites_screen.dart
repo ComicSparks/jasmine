@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/login.dart';
 import 'package:jasmine/screens/components/comic_pager.dart';
@@ -60,7 +61,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       try {
         _folderMap[value.fid] = value.name;
       } catch (e) {
-        print(e);
+        debugPrient(e);
         defaultToast(context, "$e");
       }
     }
@@ -113,7 +114,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             onPressed: _chooseFolder,
             child: Row(
               children: [
-                const Icon(Icons.folder_copy_outlined,size: 15),
+                const Icon(Icons.folder_copy_outlined, size: 15),
                 Container(width: 8),
                 Text(_folderMap[_folderId] ?? ""),
               ],
@@ -124,15 +125,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ComicPager(
-        key: Key("FAVOUR:$_folderId:$_sort"),
-        onPage: (int page) async {
-          final response = await methods.favorites(_folderId, page, _sort);
-          setState(() {
-            favData  = response.folderList;
-          });
-          return InnerComicPage(total: response.total, list: response.list);
-        },
-      ),
+              key: Key("FAVOUR:$_folderId:$_sort"),
+              onPage: (int page) async {
+                final response =
+                    await methods.favorites(_folderId, page, _sort);
+                setState(() {
+                  favData = response.folderList;
+                });
+                return InnerComicPage(
+                    total: response.total, list: response.list);
+              },
+            ),
     );
   }
 }

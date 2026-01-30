@@ -5,12 +5,13 @@ import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 
 import 'ignore_upgrade_pop.dart';
-import 'is_pro.dart';
 
-const repoOwnerUrl = "https://api.github.com/repos/ComicSparks/glxx/releases/tags/jasmine";
+const repoOwnerUrl =
+    "https://api.github.com/repos/ComicSparks/glxx/releases/tags/jasmine";
 const _versionUrl =
     "https://api.github.com/repos/OWNER/jasmine/releases/latest";
 
@@ -83,8 +84,11 @@ bool dirtyVersion() {
 // maybe exception
 Future _versionCheck() async {
   if (_versionExp.hasMatch(_version)) {
-    var owner = jsonDecode(await methods.httpGet(repoOwnerUrl))["body"].toString().trim();
-    var json = jsonDecode(await methods.httpGet(_versionUrl.replaceAll("OWNER", owner)));
+    var owner = jsonDecode(await methods.httpGet(repoOwnerUrl))["body"]
+        .toString()
+        .trim();
+    var json = jsonDecode(
+        await methods.httpGet(_versionUrl.replaceAll("OWNER", owner)));
     if (json["name"] != null) {
       String latestVersion = (json["name"]);
       if (latestVersion != _version) {
@@ -94,7 +98,7 @@ Future _versionCheck() async {
     }
   } // else dirtyVersion
   versionEvent.broadcast();
-  print("$_latestVersion");
+  debugPrient("$_latestVersion");
 }
 
 String _periodText() {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import '../basic/methods.dart';
 import '../configs/is_pro.dart';
 import 'access_key_replace_screen.dart';
@@ -109,7 +110,7 @@ class _ProScreenState extends State<ProScreen> {
                 await methods.reloadPro();
                 defaultToast(context, "SUCCESS");
               } catch (e, s) {
-                print("$e\n$s");
+                debugPrient("$e\n$s");
                 defaultToast(context, "FAIL");
               }
               await reloadIsPro();
@@ -126,7 +127,7 @@ class _ProScreenState extends State<ProScreen> {
                   await methods.inputCdKey(code);
                   defaultToast(context, "SUCCESS");
                 } catch (e, s) {
-                  print("$e\n$s");
+                  debugPrient("$e\n$s");
                   defaultToast(context, "FAIL");
                 }
               }
@@ -168,7 +169,7 @@ class _ProScreenState extends State<ProScreen> {
         );
         text += "\n可重绑时间: ${dateTime.toLocal()}";
       }
-      
+
       List<TextSpan> append = [];
       if (proInfoPat.bindUid == "") {
         append.add(const TextSpan(
@@ -191,7 +192,7 @@ class _ProScreenState extends State<ProScreen> {
           style: TextStyle(color: Colors.green),
         ));
       }
-      
+
       widgets.add(ListTile(
         onTap: () async {
           var choose = await chooseMapDialog<int>(

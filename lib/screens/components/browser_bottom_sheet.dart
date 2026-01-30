@@ -1,4 +1,5 @@
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/auto_clean.dart';
 import 'package:jasmine/configs/network_api_host.dart';
@@ -118,7 +119,7 @@ class _BrowserBottomSheetState extends State<_BrowserBottomSheet> {
                   await methods.cleanAllCache();
                   defaultToast(context, "清理成功");
                 } catch (e) {
-                  print("$e");
+                  debugPrient("$e");
                   defaultToast(context, "清理失败");
                 }
                 setState(() {});

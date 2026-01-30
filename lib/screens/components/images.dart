@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'dart:io';
 import 'dart:ui' as ui show Codec;
 
@@ -303,11 +304,12 @@ class _JMPageImageState extends State<JMPageImage> {
   }
 }
 
-Widget pathFutureImage(BuildContext context, Future<String> future, double? width, double? height,
+Widget pathFutureImage(
+    BuildContext context, Future<String> future, double? width, double? height,
     {BoxFit fit = BoxFit.cover,
-      List<LongPressMenuItem>? longPressMenuItems,
-      Key? key,
-      VoidCallback? onReload}) {
+    List<LongPressMenuItem>? longPressMenuItems,
+    Key? key,
+    VoidCallback? onReload}) {
   // 使用 key 来确保 FutureBuilder 完全重建
   return FutureBuilder<String>(
       key: key,
@@ -315,8 +317,8 @@ Widget pathFutureImage(BuildContext context, Future<String> future, double? widt
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         // 检查是否有错误
         if (snapshot.hasError) {
-          print("${snapshot.error}");
-          print("${snapshot.stackTrace}");
+          debugPrient("${snapshot.error}");
+          debugPrient("${snapshot.stackTrace}");
           return buildError(
             context,
             width,
@@ -400,7 +402,8 @@ Widget buildError(BuildContext context, double? width, double? height,
       ),
     ),
   );
-  if (onReload != null || (longPressMenuItems != null && longPressMenuItems.isNotEmpty)) {
+  if (onReload != null ||
+      (longPressMenuItems != null && longPressMenuItems.isNotEmpty)) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: () async {
@@ -412,7 +415,7 @@ Widget buildError(BuildContext context, double? width, double? height,
           menuItems.addAll(longPressMenuItems.map((e) => e.title));
         }
         if (menuItems.isEmpty) return;
-        
+
         String? choose = await chooseListDialog(
           context,
           title: '请选择',
@@ -481,8 +484,8 @@ Widget buildFile(
     width: width,
     height: height,
     errorBuilder: (a, b, c) {
-      print("$b");
-      print("$c");
+      debugPrient("$b");
+      debugPrient("$c");
       return buildError(context, width, height);
     },
     fit: fit,
@@ -496,13 +499,13 @@ Widget buildFile(
           '预览图片',
           ...Platform.isAndroid || Platform.isIOS
               ? [
-            '保存图片到相册',
-          ]
+                  '保存图片到相册',
+                ]
               : [],
           ...!Platform.isIOS
               ? [
-            '保存图片到文件',
-          ]
+                  '保存图片到文件',
+                ]
               : [],
           ...longPressMenuItems?.map((e) => e.title) ?? [],
         ],

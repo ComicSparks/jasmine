@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/log.dart';
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 import '../configs/is_pro.dart';
@@ -8,7 +9,8 @@ import 'components/right_click_pop.dart';
 class AccessKeyReplaceScreen extends StatefulWidget {
   final String accessKey;
 
-  const AccessKeyReplaceScreen({Key? key, required this.accessKey}) : super(key: key);
+  const AccessKeyReplaceScreen({Key? key, required this.accessKey})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AccessKeyReplaceScreenState();
@@ -46,7 +48,7 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
         _loading = false;
       });
     } catch (e, s) {
-      print("$e\n$s");
+      debugPrient("$e\n$s");
       defaultToast(context, "验证失败: $e");
       Navigator.of(context).pop();
     }
@@ -139,7 +141,7 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
       await reloadIsPro();
       Navigator.of(context).pop();
     } catch (e, s) {
-      print("$e\n$s");
+      debugPrient("$e\n$s");
       defaultToast(context, "绑定失败: $e");
     }
   }
@@ -152,7 +154,7 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
       await reloadIsPro();
       Navigator.of(context).pop();
     } catch (e, s) {
-      print("$e\n$s");
+      debugPrient("$e\n$s");
       defaultToast(context, "保存失败: $e");
     }
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/Authentication.dart';
 import 'package:jasmine/configs/configs.dart';
@@ -45,7 +46,7 @@ class _InitScreenState extends State<InitScreen> {
     try {
       await methods.init();
       await initConfigs(context);
-      print("STATE : ${loginStatus}");
+      debugPrient("STATE : ${loginStatus}");
       if (!currentPassed()) {
         Future.delayed(Duration.zero, () async {
           await webDavSyncAuto(context);
@@ -84,7 +85,7 @@ class _InitScreenState extends State<InitScreen> {
         });
       }
     } catch (e, st) {
-      print("$e\n$st");
+      debugPrient("$e\n$st");
       defaultToast(context, "初始化失败, 请设置网络");
       Future.delayed(Duration.zero, () {
         Navigator.of(context).pushReplacement(

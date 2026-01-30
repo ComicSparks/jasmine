@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:jasmine/basic/log.dart';
 
 import 'entities.dart';
 
@@ -454,17 +455,17 @@ class Methods {
   }
 
   Future import_jm_zip(String path) {
-    print(path);
+    debugPrient(path);
     return _invoke("import_jm_zip", path);
   }
 
   Future import_jm_jmi(String path) {
-    print(path);
+    debugPrient(path);
     return _invoke("import_jm_jmi", path);
   }
 
   Future import_jm_dir(String path) {
-    print(path);
+    debugPrient(path);
     return _invoke("import_jm_dir", path);
   }
 
@@ -554,12 +555,12 @@ class Methods {
   }
 
   Future<int> ping(String idx) async {
-    print("PING API $idx");
+    debugPrient("PING API $idx");
     return int.parse(await _invoke("ping_server", idx));
   }
 
   Future<int> pingCdn(String idx) async {
-    print("PING CDN $idx");
+    debugPrient("PING CDN $idx");
     return int.parse(await _invoke("ping_cdn", idx));
   }
 

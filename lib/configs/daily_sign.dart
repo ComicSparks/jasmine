@@ -1,6 +1,7 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/login.dart';
 
@@ -48,7 +49,7 @@ Future<void> checkDailySignStatus(BuildContext context,
     }
     _setDailySignStatus(DailySignStatus.signed);
   } catch (e, st) {
-    print("$e\n$st");
+    debugPrient("$e\n$st");
     if (toast) {
       defaultToast(context, "$e");
     }

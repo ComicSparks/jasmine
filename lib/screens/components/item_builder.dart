@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/log.dart';
 
 // 非全屏FutureBuilder封装
 class ItemBuilder<T> extends StatelessWidget {
@@ -27,8 +28,8 @@ class ItemBuilder<T> extends StatelessWidget {
             future: future,
             builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
               if (snapshot.hasError) {
-                print("${snapshot.error}");
-                print("${snapshot.stackTrace}");
+                debugPrient("${snapshot.error}");
+                debugPrient("${snapshot.stackTrace}");
                 return InkWell(
                   onTap: onRefresh,
                   child: Container(

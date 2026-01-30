@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 
 import '../basic/commons.dart';
@@ -134,7 +135,7 @@ class _DownloadsExportingScreen2State extends State<DownloadsExportingScreen2> {
       defaultToast(context, "$e");
       return;
     }
-    print("path $path");
+    debugPrient("path $path");
     if (path != null) {
       try {
         setState(() {
@@ -171,7 +172,7 @@ class _DownloadsExportingScreen2State extends State<DownloadsExportingScreen2> {
       defaultToast(context, "$e");
       return;
     }
-    print("path $path");
+    debugPrient("path $path");
     if (path != null) {
       try {
         setState(() {
@@ -210,7 +211,7 @@ class _DownloadsExportingScreen2State extends State<DownloadsExportingScreen2> {
       defaultToast(context, "$e");
       return;
     }
-    print("path $path");
+    debugPrient("path $path");
     if (path != null) {
       try {
         setState(() {

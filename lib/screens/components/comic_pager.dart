@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/pager_controller_mode.dart';
 import 'package:jasmine/screens/comic_info_screen.dart';
@@ -114,7 +115,7 @@ class _StreamPagerState extends State<_StreamPager> {
         _joining = false;
       });
     } catch (e, st) {
-      print("$e\n$st");
+      debugPrient("$e\n$st");
       setState(() {
         _joinSuccess = false;
         _joining = false;
@@ -326,7 +327,11 @@ class _PagerPager extends StatefulWidget {
   final List<ComicLongPressMenuItem>? longPressMenuItems;
   final List<Widget>? appendList;
 
-  const _PagerPager({Key? key, required this.onPage, this.longPressMenuItems, this.appendList})
+  const _PagerPager(
+      {Key? key,
+      required this.onPage,
+      this.longPressMenuItems,
+      this.appendList})
       : super(key: key);
 
   @override

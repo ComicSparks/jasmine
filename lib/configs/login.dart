@@ -4,6 +4,7 @@ import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/is_pro.dart';
 
@@ -47,7 +48,7 @@ Future initLogin(BuildContext context) async {
       _loginState = LoginStatus.loginField;
     }
   } catch (e, st) {
-    print("$e\n$st");
+    debugPrient("$e\n$st");
     _loginState = LoginStatus.loginField;
   } finally {
     reloadIsPro();
@@ -137,7 +138,7 @@ Future fav(BuildContext buildContext) async {
   try {
     favData = (await methods.favorite()).folderList;
   } catch (e, st) {
-    print("$e\n$st");
+    debugPrient("$e\n$st");
     defaultToast(buildContext, "$e");
   }
 }
@@ -150,7 +151,7 @@ Future login(String username, String password, BuildContext context) async {
     _loginState = LoginStatus.loginSuccess;
     fav(context);
   } catch (e, st) {
-    print("$e\n$st");
+    debugPrient("$e\n$st");
     _loginState = LoginStatus.loginField;
     _loginMessage = "$e";
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
+import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/app_font_size.dart';
 import 'package:jasmine/screens/components/item_builder.dart';
@@ -188,7 +189,7 @@ Widget _buildPostComment(
             f?.call();
           }
         } catch (e, st) {
-          print("$e\n$st");
+          debugPrient("$e\n$st");
           defaultToast(context, "评论失败");
         }
       }
@@ -399,8 +400,7 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
                                   ..onTap = () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            TextPreviewScreen(
+                                        builder: (context) => TextPreviewScreen(
                                           text: content,
                                         ),
                                       ),
