@@ -1,6 +1,7 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 
+import '../basic/commons.dart';
 import '../basic/methods.dart';
 import 'is_pro.dart';
 
@@ -24,11 +25,15 @@ Widget disableRecommendContentSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
       return SwitchListTile(
-        title: const Text("关闭推荐内容"),
+        title: Text(
+          "关闭推荐内容" + (!isPro ? "\n(发电后使用)" : ""),
+          style: TextStyle(color: isPro ? null : Colors.grey),
+        ),
         subtitle: Text(_disableRecommendContent ? "已关闭" : "已开启"),
         value: _disableRecommendContent,
         onChanged: (value) async {
           if (!isPro) {
+            defaultToast(context, "发电才能使用哦~");
             return;
           }
           await methods.saveProperty(_propertyName, "$value");

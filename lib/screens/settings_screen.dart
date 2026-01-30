@@ -115,8 +115,8 @@ class _SettingsState extends State<SettingsScreen> {
               leading: Icon(Icons.ad_units),
               title: Text('系统和应用程序'),
               children: [
+                disableRecommendContentSetting(),
                 if (isPro) ...[
-                  disableRecommendContentSetting(),
                   const Divider(),
                   autoUpdateCheckSetting(),
                   ignoreUpgradePopSetting(),
