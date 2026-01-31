@@ -85,3 +85,6 @@ tests_data/
 .fvm/
 
 *.db
+tmp/
+.tmp/
+.cxx/

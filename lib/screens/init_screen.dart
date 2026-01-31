@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
@@ -14,6 +15,7 @@ import 'app_screen.dart';
 import 'calculator_screen.dart';
 import 'first_login_screen.dart';
 import 'network_setting_screen.dart';
+import 'unlock_browser_screen.dart';
 
 class InitScreen extends StatefulWidget {
   const InitScreen({Key? key}) : super(key: key);
@@ -52,7 +54,10 @@ class _InitScreenState extends State<InitScreen> {
           await webDavSyncAuto(context);
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (BuildContext context) {
-              return const CalculatorScreen();
+              if (Platform.isLinux) {
+                return const CalculatorScreen();
+              }
+              return const UnlockBrowserScreen();
             }),
           );
         });

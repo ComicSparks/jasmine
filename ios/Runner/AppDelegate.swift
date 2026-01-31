@@ -2,25 +2,15 @@ import UIKit
 import Flutter
 import LocalAuthentication
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
-    override func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
+    lazy var flutterEngine = FlutterEngine(name: "jasmine_engine")
 
-        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        let fromChars = documentDirectory.cString(using: String.Encoding.utf8)
-
-        let applicationSupportDirectory = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
-        let chars = applicationSupportDirectory.cString(using: String.Encoding.utf8)
-
-        migration_ffi(fromChars,chars)
-        init_ffi(chars!)
-
-        
-        let controller = self.window.rootViewController as! FlutterViewController
-        FlutterMethodChannel.init(name: "methods", binaryMessenger: controller as! FlutterBinaryMessenger).setMethodCallHandler { (call, result) in
+    private func setupMethodChannel(
+        binaryMessenger: FlutterBinaryMessenger,
+        documentDirectory: String
+    ) {
+        FlutterMethodChannel(name: "methods", binaryMessenger: binaryMessenger).setMethodCallHandler { (call, result) in
             Thread {
                 switch (call.method){
                 case "invoke":
@@ -66,9 +56,26 @@ import LocalAuthentication
                 }
             }.start()
         }
-        
-        
-        GeneratedPluginRegistrant.register(with: self)
+    }
+
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+
+        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        let fromChars = documentDirectory.cString(using: String.Encoding.utf8)
+
+        let applicationSupportDirectory = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
+        let chars = applicationSupportDirectory.cString(using: String.Encoding.utf8)
+
+        migration_ffi(fromChars,chars)
+        init_ffi(chars!)
+
+        flutterEngine.run()
+        GeneratedPluginRegistrant.register(with: flutterEngine)
+        setupMethodChannel(binaryMessenger: flutterEngine.binaryMessenger, documentDirectory: documentDirectory)
+
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 }

@@ -5,7 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'dart:io';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show Codec, instantiateImageCodec;
 
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/screens/components/types.dart';
@@ -20,7 +20,7 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
   JM3x4ImageProvider(this.comicId, {this.scale = 1.0});
 
   @override
-  ImageStreamCompleter load(JM3x4ImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(JM3x4ImageProvider key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
@@ -34,7 +34,7 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
 
   Future<ui.Codec> _loadAsync(JM3x4ImageProvider key) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
+    return ui.instantiateImageCodec(
       await File(await methods.jm3x4Cover(comicId)).readAsBytes(),
     );
   }
@@ -47,7 +47,7 @@ class JM3x4ImageProvider extends ImageProvider<JM3x4ImageProvider> {
   }
 
   @override
-  int get hashCode => hashValues(comicId, scale);
+  int get hashCode => Object.hash(comicId, scale);
 
   @override
   String toString() => '$runtimeType('
@@ -65,7 +65,7 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
   PageImageProvider(this.id, this.imageName, {this.scale = 1.0});
 
   @override
-  ImageStreamCompleter load(PageImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(PageImageProvider key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
@@ -79,7 +79,7 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
 
   Future<ui.Codec> _loadAsync(PageImageProvider key) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
+    return ui.instantiateImageCodec(
       await File(await methods.jmPageImage(id, imageName)).readAsBytes(),
     );
   }
@@ -94,7 +94,7 @@ class PageImageProvider extends ImageProvider<PageImageProvider> {
   }
 
   @override
-  int get hashCode => hashValues(id, imageName, scale);
+  int get hashCode => Object.hash(id, imageName, scale);
 
   @override
   String toString() => '$runtimeType('
