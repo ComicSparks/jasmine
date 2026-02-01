@@ -19,12 +19,14 @@ class UnlockBrowserScreen extends StatefulWidget {
 
 class _UnlockBrowserScreenState extends State<UnlockBrowserScreen> {
   static const _activationScheme = 'jm://start';
+  static const _defaultUrl = 'https://www.bing.com/';
 
-  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _addressController =
+      TextEditingController(text: _defaultUrl);
   final FocusNode _addressFocusNode = FocusNode();
 
   InAppWebViewController? _webViewController;
-  String _currentUrl = 'about:blank';
+  String _currentUrl = _defaultUrl;
   double _progress = 0;
 
   @override

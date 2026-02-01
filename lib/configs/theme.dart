@@ -41,6 +41,14 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
   final navLabelStyle = (textTheme.labelSmall ??
           const TextStyle(fontSize: 11, fontWeight: FontWeight.w600))
       .copyWith(fontWeight: FontWeight.w600);
+  final statusBarIconBrightness =
+      brightness == Brightness.light ? Brightness.dark : Brightness.light;
+  final statusBarBrightness = statusBarIconBrightness;
+  final statusBarOverlay = SystemUiOverlayStyle(
+    statusBarColor: scheme.surface,
+    statusBarIconBrightness: statusBarIconBrightness,
+    statusBarBrightness: statusBarBrightness,
+  );
 
   return ThemeData(
     useMaterial3: true,
@@ -51,6 +59,7 @@ ThemeData _buildAppTheme(ColorScheme scheme, Brightness brightness) {
     scaffoldBackgroundColor: scheme.background,
     dialogBackgroundColor: scheme.surface,
     appBarTheme: AppBarTheme(
+      systemOverlayStyle: statusBarOverlay,
       backgroundColor: scheme.surface,
       surfaceTintColor: scheme.surfaceTint,
       foregroundColor: scheme.onSurface,
