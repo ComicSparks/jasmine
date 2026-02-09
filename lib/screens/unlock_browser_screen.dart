@@ -137,68 +137,7 @@ class _UnlockBrowserScreenState extends State<UnlockBrowserScreen> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.info_outline),
-                              const SizedBox(width: 8),
-                              Text(
-                                '解锁主页',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
                           const SizedBox(height: 8),
-                          Text(
-                            '在地址栏输入 $_activationScheme 并回车即可解锁主页。',
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              OutlinedButton.icon(
-                                icon: const Icon(Icons.content_copy, size: 16),
-                                label: const Text('复制解锁地址'),
-                                onPressed: () {
-                                  Clipboard.setData(
-                                    const ClipboardData(text: _activationScheme),
-                                  );
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('已复制到剪贴板'),
-                                      duration: Duration(seconds: 1),
-                                    ),
-                                  );
-                                },
-                              ),
-                              OutlinedButton.icon(
-                                icon: const Icon(Icons.home_outlined, size: 16),
-                                label: const Text('打开空白页'),
-                                onPressed: () async {
-                                  Navigator.pop(context);
-                                  _addressController.text = 'about:blank';
-                                  await _loadFromAddressBar('about:blank');
-                                },
-                              ),
-                              OutlinedButton.icon(
-                                icon: const Icon(Icons.link, size: 16),
-                                label: const Text('复制当前链接'),
-                                onPressed: () {
-                                  final url = _currentUrl;
-                                  Clipboard.setData(ClipboardData(text: url));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('已复制到剪贴板'),
-                                      duration: Duration(seconds: 1),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
