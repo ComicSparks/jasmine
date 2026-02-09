@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/app_font_size.dart';
 import 'package:jasmine/configs/app_orientation.dart';
+import 'package:jasmine/configs/drag_region_lock.dart';
+import 'package:jasmine/configs/gesture_speed.dart';
 import 'package:jasmine/configs/network_api_host.dart';
 import 'package:jasmine/configs/network_cdn_host.dart';
+import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/screens/downloads_exports_screen2.dart';
 
 import '../basic/commons.dart';
@@ -91,6 +94,12 @@ class _SettingsState extends State<SettingsScreen> {
                 const Divider(),
                 volumeKeyControlSetting(),
                 noAnimationSetting(),
+                const Divider(),
+                gestureSpeedSetting(),
+                dragRegionLockSetting(),
+                readerZoomMinScaleSetting(),
+                readerZoomMaxScaleSetting(),
+                readerZoomDoubleTapScaleSetting(),
                 const Divider(),
                 twoGalleryDirectionSetting(context),
                 const Divider(),

@@ -88,3 +88,4 @@ tests_data/
 tmp/
 .tmp/
 .cxx/
+.home/

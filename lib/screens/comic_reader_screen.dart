@@ -11,15 +11,20 @@ import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/reader_controller_type.dart';
+import 'package:jasmine/configs/drag_region_lock.dart';
+import 'package:jasmine/configs/gesture_speed.dart';
 import 'package:jasmine/configs/reader_direction.dart';
 import 'package:jasmine/configs/reader_slider_position.dart';
 import 'package:jasmine/configs/reader_type.dart';
+import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/configs/two_page_direction.dart';
 import 'package:jasmine/screens/components/content_error.dart';
 import 'package:jasmine/screens/components/content_loading.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:zoomable_positioned_list/zoomable_positioned_list.dart'
+    as zoomable;
 
 import '../configs/ignore_view_log.dart';
 import '../configs/no_animation.dart';
@@ -639,9 +644,7 @@ abstract class _ComicReaderState extends State<_ComicReader> {
                         ),
                         Container(width: 10),
                         Expanded(
-                          child: widget.readerType != ReaderType.webToonFreeZoom
-                              ? _buildSliderBottom()
-                              : Container(),
+                          child: _buildSliderBottom(),
                         ),
                         Container(width: 10),
                         IconButton(
@@ -1036,16 +1039,16 @@ class _SettingPanelState extends State<_SettingPanel> {
 class _ComicReaderWebToonState extends _ComicReaderState {
   var _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
   late final List<Size?> _trueSizes = [];
-  late final ItemScrollController _itemScrollController;
-  late final ItemPositionsListener _itemPositionsListener;
+  late final zoomable.ItemScrollController _itemScrollController;
+  late final zoomable.ItemPositionsListener _itemPositionsListener;
 
   @override
   void initState() {
-    for (var e in widget.chapter.images) {
+    for (final _ in widget.chapter.images) {
       _trueSizes.add(null);
     }
-    _itemScrollController = ItemScrollController();
-    _itemPositionsListener = ItemPositionsListener.create();
+    _itemScrollController = zoomable.ItemScrollController();
+    _itemPositionsListener = zoomable.ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onListCurrentChange);
     super.initState();
   }
@@ -1057,11 +1060,21 @@ class _ComicReaderWebToonState extends _ComicReaderState {
   }
 
   void _onListCurrentChange() {
-    var to = _itemPositionsListener.itemPositions.value.first.index;
+    final to =
+        _findFirstVisibleIndex(_itemPositionsListener.itemPositions.value);
     // 包含一个下一章, 假设5张图片 0,1,2,3,4 length=5, 下一章=5
-    if (to >= 0 && to < widget.chapter.images.length) {
+    if (to != null && to >= 0 && to < widget.chapter.images.length) {
       super._onCurrentChange(to);
     }
+  }
+
+  int? _findFirstVisibleIndex(Iterable<zoomable.ItemPosition> positions) {
+    final visible = positions
+        .where((p) => p.itemTrailingEdge > 0 && p.itemLeadingEdge < 1)
+        .toList();
+    if (visible.isEmpty) return null;
+    visible.sort((a, b) => a.index.compareTo(b.index));
+    return visible.first.index;
   }
 
   @override
@@ -1146,7 +1159,8 @@ class _ComicReaderWebToonState extends _ComicReaderState {
             ),
           );
         }
-        return ScrollablePositionedList.builder(
+        return zoomable.ZoomablePositionedList.builder(
+          enableZoom: false,
           initialScrollIndex: widget.startIndex,
           scrollDirection: widget.readerDirection == ReaderDirection.topToBottom
               ? Axis.vertical
@@ -1393,33 +1407,61 @@ class _ComicReaderGalleryState extends _ComicReaderState {
   }
 }
 
-class _ListViewReaderState extends _ComicReaderState
-    with SingleTickerProviderStateMixin {
+class _ListViewReaderState extends _ComicReaderState {
+  var _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
   final List<Size?> _trueSizes = [];
-  final _transformationController = TransformationController();
-  late TapDownDetails _doubleTapDetails;
-  late final _animationController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 100),
-  );
+  late final zoomable.ItemScrollController _itemScrollController;
+  late final zoomable.ItemPositionsListener _itemPositionsListener;
 
   @override
   void initState() {
-    for (var e in widget.chapter.images) {
+    for (final _ in widget.chapter.images) {
       _trueSizes.add(null);
     }
+    _itemScrollController = zoomable.ItemScrollController();
+    _itemPositionsListener = zoomable.ItemPositionsListener.create();
+    _itemPositionsListener.itemPositions.addListener(_onListCurrentChange);
     super.initState();
   }
 
   @override
   void dispose() {
-    _transformationController.dispose();
-    _animationController.dispose();
+    _itemPositionsListener.itemPositions.removeListener(_onListCurrentChange);
     super.dispose();
   }
 
   @override
-  void _needJumpTo(int index, bool animation) {}
+  void _needJumpTo(int index, bool animation) {
+    if (!animation || currentNoAnimation()) {
+      _itemScrollController.jumpTo(index: index);
+      return;
+    }
+    if (DateTime.now().millisecondsSinceEpoch < _controllerTime) {
+      return;
+    }
+    _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
+    _itemScrollController.scrollTo(
+      index: index,
+      duration: const Duration(milliseconds: 400),
+    );
+  }
+
+  void _onListCurrentChange() {
+    final to =
+        _findFirstVisibleIndex(_itemPositionsListener.itemPositions.value);
+    if (to != null && to >= 0 && to < widget.chapter.images.length) {
+      super._onCurrentChange(to);
+    }
+  }
+
+  int? _findFirstVisibleIndex(Iterable<zoomable.ItemPosition> positions) {
+    final visible = positions
+        .where((p) => p.itemTrailingEdge > 0 && p.itemLeadingEdge < 1)
+        .toList();
+    if (visible.isEmpty) return null;
+    visible.sort((a, b) => a.index.compareTo(b.index));
+    return visible.first.index;
+  }
 
   @override
   Widget _buildViewer() {
@@ -1486,20 +1528,34 @@ class _ListViewReaderState extends _ComicReaderState
             ),
           );
         }
-        var list = ListView.builder(
-          scrollDirection: currentReaderDirection == ReaderDirection.topToBottom
+        return zoomable.ZoomablePositionedList.builder(
+          gestureSpeed: currentGestureSpeed(),
+          dragRegionLock: currentDragRegionLock(),
+          minScale: readerZoomMinScale,
+          maxScale: readerZoomMaxScale,
+          doubleTapScale: readerZoomDoubleTapScale,
+          doubleTapAnimationDuration: currentNoAnimation()
+              ? Duration.zero
+              : const Duration(milliseconds: 200),
+          enableDoubleTapZoom:
+              currentReaderControllerType != ReaderControllerType.touchDouble &&
+                  currentReaderControllerType !=
+                      ReaderControllerType.touchDoubleOnceNext,
+          initialScrollIndex: widget.startIndex,
+          scrollDirection: widget.readerDirection == ReaderDirection.topToBottom
               ? Axis.vertical
               : Axis.horizontal,
-          reverse: currentReaderDirection == ReaderDirection.rightToLeft,
+          reverse: widget.readerDirection == ReaderDirection.rightToLeft,
           padding: EdgeInsets.only(
-            // 不管全屏与否, 滚动方向如何, 顶部永远保持间距
-            top: currentReaderDirection == ReaderDirection.topToBottom
+            top: widget.readerDirection == ReaderDirection.topToBottom
                 ? super._appBarHeight()
                 : max(super._appBarHeight(), super._bottomBarHeight()),
-            bottom: currentReaderDirection == ReaderDirection.topToBottom
-                ? 130 // 纵向滚动 底部永远都是130的空白
+            bottom: widget.readerDirection == ReaderDirection.topToBottom
+                ? 130
                 : max(super._appBarHeight(), super._bottomBarHeight()),
           ),
+          itemScrollController: _itemScrollController,
+          itemPositionsListener: _itemPositionsListener,
           itemCount: widget.chapter.images.length + 1,
           itemBuilder: (BuildContext context, int index) {
             if (widget.chapter.images.length == index) {
@@ -1507,17 +1563,6 @@ class _ListViewReaderState extends _ComicReaderState
             }
             return _images[index];
           },
-        );
-        var viewer = InteractiveViewer(
-          transformationController: _transformationController,
-          minScale: 1,
-          maxScale: 2,
-          child: list,
-        );
-        return GestureDetector(
-          onDoubleTap: _handleDoubleTap,
-          onDoubleTapDown: _handleDoubleTapDown,
-          child: viewer,
         );
       },
     );
@@ -1545,36 +1590,12 @@ class _ListViewReaderState extends _ComicReaderState
       ),
     );
   }
-
-  void _handleDoubleTapDown(TapDownDetails details) {
-    _doubleTapDetails = details;
-  }
-
-  void _handleDoubleTap() {
-    if (_animationController.isAnimating) {
-      return;
-    }
-    if (_transformationController.value != Matrix4.identity()) {
-      _transformationController.value = Matrix4.identity();
-    } else {
-      var position = _doubleTapDetails.localPosition;
-      var animation = Tween(begin: 0, end: 1.0).animate(_animationController);
-      animation.addListener(() {
-        _transformationController.value = Matrix4.identity()
-          ..translate(
-              -position.dx * animation.value, -position.dy * animation.value)
-          ..scale(animation.value + 1.0);
-      });
-      _animationController.forward(from: 0);
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 class _TwoPageGalleryReaderState extends _ComicReaderState {
   late PageController _pageController;
-  var _controllerTime = DateTime.now().millisecondsSinceEpoch + 400;
   late final List<Size?> _trueSizes = [];
   List<ImageProvider> ips = [];
   List<PhotoViewGalleryPageOptions> options = [];
@@ -1584,7 +1605,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
   @override
   void initState() {
     // 需要先初始化 super._startIndex 才能使用, 所以在上面
-    for (var e in widget.chapter.images) {
+    for (final _ in widget.chapter.images) {
       _trueSizes.add(null);
     }
     super.initState();

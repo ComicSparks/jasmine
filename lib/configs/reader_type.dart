@@ -34,7 +34,7 @@ String readerTypeName(ReaderType type, BuildContext context) {
     case ReaderType.gallery:
       return "相册";
     case ReaderType.webToonFreeZoom:
-      return "自由放大滚动 无法翻页";
+      return "自由放大滚动";
     case ReaderType.twoPageGallery:
       return "双页相册";
   }
