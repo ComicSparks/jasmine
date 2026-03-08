@@ -137,8 +137,9 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
     try {
       defaultToast(context, "绑定中...");
       await methods.bindPatAccount(widget.accessKey, _username);
-      defaultToast(context, "绑定成功");
+      await methods.reloadPatAccount();
       await reloadIsPro();
+      defaultToast(context, "绑定成功");
       Navigator.of(context).pop();
     } catch (e, s) {
       debugPrient("$e\n$s");
@@ -150,8 +151,9 @@ class _AccessKeyReplaceScreenState extends State<AccessKeyReplaceScreen> {
     try {
       defaultToast(context, "保存中...");
       await methods.bindPatAccount(widget.accessKey, _username);
-      defaultToast(context, "保存成功");
+      await methods.reloadPatAccount();
       await reloadIsPro();
+      defaultToast(context, "保存成功");
       Navigator.of(context).pop();
     } catch (e, s) {
       debugPrient("$e\n$s");
