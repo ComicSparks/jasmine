@@ -125,7 +125,8 @@ Future _versionCheck() async {
       if (remoteSemVer != null &&
           _compareSemVer(localSemVer, remoteSemVer) > 0) {
         _latestVersion = remoteLatestVersion;
-        _latestVersionInfo = "";
+        _latestVersionInfo =
+            config["changeLog"]?.toString().trim() ?? "";
       } else {
         _latestVersion = null;
         _latestVersionInfo = null;
