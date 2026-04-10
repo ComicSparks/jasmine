@@ -44,6 +44,7 @@ import '../configs/web_dav_password.dart';
 import '../configs/web_dav_sync_switch.dart';
 import '../configs/web_dav_url.dart';
 import '../configs/web_dav_username.dart';
+import '../configs/passed.dart' as passed_config;
 import 'components/right_click_pop.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -164,6 +165,19 @@ class _SettingsState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _resetBrowser(BuildContext context) async {
+    if (!await confirmDialog(context, "重置浏览器", "确定删除浏览器启动标记吗? 下次启动将重新进入浏览器。")) {
+      return;
+    }
+    try {
+      await methods.deleteProperty("passed");
+      await passed_config.initPassed();
+      defaultToast(context, "重置浏览器成功");
+    } catch (e) {
+      defaultToast(context, "重置浏览器失败 : $e");
+    }
+  }
+
   Widget _startupImageSettingTile(BuildContext context) {
     return ListTile(
       onTap: () async {
@@ -179,6 +193,15 @@ class _SettingsState extends State<SettingsScreen> {
         await _deleteStartupImage(context);
       },
       title: const Text("删除启动图"),
+    );
+  }
+
+  Widget _resetBrowserTile(BuildContext context) {
+    return ListTile(
+      onTap: () async {
+        await _resetBrowser(context);
+      },
+      title: const Text("重置浏览器"),
     );
   }
 
@@ -258,6 +281,8 @@ class _SettingsState extends State<SettingsScreen> {
               leading: Icon(Icons.ad_units),
               title: Text('系统和应用程序'),
               children: [
+                _resetBrowserTile(context),
+                const Divider(),
                 _startupImageSettingTile(context),
                 if (_startupImageExists) _deleteStartupImageTile(context),
                 const Divider(),

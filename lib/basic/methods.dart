@@ -139,6 +139,10 @@ class Methods {
     return _invoke("save_property", {"k": key, "v": v});
   }
 
+  Future deleteProperty(String key) {
+    return _invoke("delete_property", key);
+  }
+
   Future<AlbumResponse> album(int id, {bool ignoreViewLog = false}) async {
     return AlbumResponse.fromJson(jsonDecode(await _invoke("album", {
       "id": id,
