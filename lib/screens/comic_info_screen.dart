@@ -135,96 +135,101 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
           ),
         ],
       ),
-      body: ListView(
-        shrinkWrap: true,
-        children: [
-          widget.simple != null
-              ? FutureBuilder(
-                  future: _albumFuture,
-                  builder: (a, b) {
-                    if (b.connectionState != ConnectionState.done) {
-                      return ComicInfoCard(widget.simple!, link: true);
-                    }
-                    return Container();
-                  })
-              : Container(),
-          ItemBuilder(
-            future: _albumFuture,
-            onRefresh: () async {
-              setState(() {
-                _albumFuture = methods.album(
-                  widget.comicId,
-                  ignoreViewLog: currentIgnoreVewLog(),
-                );
-              });
-            },
-            successBuilder: (
-              BuildContext context,
-              AsyncSnapshot<AlbumResponse> snapshot,
-            ) {
-              AlbumResponse album = snapshot.requireData;
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            widget.simple != null
+                ? FutureBuilder(
+                    future: _albumFuture,
+                    builder: (a, b) {
+                      if (b.connectionState != ConnectionState.done) {
+                        return ComicInfoCard(widget.simple!, link: true);
+                      }
+                      return Container();
+                    })
+                : Container(),
+            ItemBuilder(
+              future: _albumFuture,
+              onRefresh: () async {
+                setState(() {
+                  _albumFuture = methods.album(
+                    widget.comicId,
+                    ignoreViewLog: currentIgnoreVewLog(),
+                  );
+                });
+              },
+              successBuilder: (
+                BuildContext context,
+                AsyncSnapshot<AlbumResponse> snapshot,
+              ) {
+                AlbumResponse album = snapshot.requireData;
 
-              var _tabs = <Widget>[
-                Tab(text: '章节 (${album.series.length})'),
-                Tab(text: '评论 (${album.commentTotal})'),
-                Tab(text: '推荐 (${album.relatedList.length})'),
-              ];
+                var _tabs = <Widget>[
+                  Tab(text: '章节 (${album.series.length})'),
+                  Tab(text: '评论 (${album.commentTotal})'),
+                  Tab(text: '推荐 (${album.relatedList.length})'),
+                ];
 
-              final _views = [
-                _ComicSerials(
-                  albumToSimple(album, widget.simple),
-                  album,
-                  _viewFuture,
-                ),
-                ComicCommentsList(mode: "manhua", aid: widget.comicId),
-                _ComicRelatedList(album.relatedList),
-              ];
-
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ComicInfoCard(albumToSimple(album, widget.simple), link: true),
-                  _buildTags(album.tags),
-                  ...(album.description.isEmpty
-                      ? []
-                      : [
-                          const Divider(),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            child: SelectableText(album.description),
-                          ),
-                        ]),
-                  const Divider(),
-                  DefaultTabController(
-                    length: _tabs.length,
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 40,
-                          color: theme.colorScheme.secondary.withOpacity(.025),
-                          child: TabBar(
-                            tabs: _tabs,
-                            indicatorColor: theme.colorScheme.secondary,
-                            labelColor: theme.colorScheme.secondary,
-                            unselectedLabelColor:
-                                theme.textTheme.bodyMedium?.color,
-                            onTap: (val) async {
-                              setState(() {
-                                _tabIndex = val;
-                              });
-                            },
-                          ),
-                        ),
-                        _views[_tabIndex],
-                      ],
-                    ),
+                final _views = [
+                  _ComicSerials(
+                    albumToSimple(album, widget.simple),
+                    album,
+                    _viewFuture,
                   ),
-                ],
-              );
-            },
-          ),
-        ],
+                  ComicCommentsList(mode: "manhua", aid: widget.comicId),
+                  _ComicRelatedList(album.relatedList),
+                ];
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ComicInfoCard(
+                      albumToSimple(album, widget.simple),
+                      link: true,
+                    ),
+                    _buildTags(album.tags),
+                    ...(album.description.isEmpty
+                        ? []
+                        : [
+                            const Divider(),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              child: SelectableText(album.description),
+                            ),
+                          ]),
+                    const Divider(),
+                    DefaultTabController(
+                      length: _tabs.length,
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 40,
+                            color:
+                                theme.colorScheme.secondary.withOpacity(.025),
+                            child: TabBar(
+                              tabs: _tabs,
+                              indicatorColor: theme.colorScheme.secondary,
+                              labelColor: theme.colorScheme.secondary,
+                              unselectedLabelColor:
+                                  theme.textTheme.bodyMedium?.color,
+                              onTap: (val) async {
+                                setState(() {
+                                  _tabIndex = val;
+                                });
+                              },
+                            ),
+                          ),
+                          _views[_tabIndex],
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

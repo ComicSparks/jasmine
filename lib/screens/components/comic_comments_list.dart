@@ -28,7 +28,8 @@ class ComicCommentsList extends StatefulWidget {
   State<StatefulWidget> createState() => _ComicCommentsListState();
 }
 
-class _ComicCommentsListState extends State<ComicCommentsList> {
+class _ComicCommentsListState extends State<ComicCommentsList>
+    with AutomaticKeepAliveClientMixin {
   late Future<CommentPage> _future;
   int _maxPage = 1;
   int _page = 1;
@@ -54,6 +55,7 @@ class _ComicCommentsListState extends State<ComicCommentsList> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ItemBuilder(
       future: _future,
       onRefresh: () async {
@@ -97,6 +99,9 @@ class _ComicCommentsListState extends State<ComicCommentsList> {
       },
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   Widget _buildPrePage() {
     if (_page > 1) {
