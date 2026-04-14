@@ -21,6 +21,7 @@ import '../basic/commons.dart';
 import '../basic/web_dav_sync.dart';
 import '../configs/Authentication.dart';
 import '../configs/android_display_mode.dart';
+import '../configs/always_enter_browser.dart';
 import '../configs/categories_sort.dart';
 import '../configs/comic_seal.dart';
 import '../configs/display_jmcode.dart';
@@ -170,8 +171,7 @@ class _SettingsState extends State<SettingsScreen> {
       return;
     }
     try {
-      await methods.deleteProperty("passed");
-      await passed_config.initPassed();
+      await passed_config.clearPassed();
       defaultToast(context, "重置浏览器成功");
     } catch (e) {
       defaultToast(context, "重置浏览器失败 : $e");
@@ -281,6 +281,8 @@ class _SettingsState extends State<SettingsScreen> {
               leading: Icon(Icons.ad_units),
               title: Text('系统和应用程序'),
               children: [
+                alwaysEnterBrowserSetting(),
+                const Divider(),
                 _resetBrowserTile(context),
                 const Divider(),
                 _startupImageSettingTile(context),
