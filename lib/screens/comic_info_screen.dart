@@ -220,7 +220,13 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                               },
                             ),
                           ),
-                          _views[_tabIndex],
+                          SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 46),
+                              child: _views[_tabIndex],
+                            ),
+                          ),
                         ],
                       ),
                     ),
