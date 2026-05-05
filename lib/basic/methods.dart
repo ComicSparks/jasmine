@@ -239,6 +239,13 @@ class Methods {
     return _invoke("jm_page_image", {"id": id, "image_name": imageName});
   }
 
+  Future deleteJmPageImageCache(int id, String imageName) {
+    return _invoke(
+      "delete_jm_page_image_cache",
+      {"id": id, "image_name": imageName},
+    );
+  }
+
   Future<String> jmPhotoImage(String imageName) {
     return _invoke("jm_photo_image", imageName);
   }

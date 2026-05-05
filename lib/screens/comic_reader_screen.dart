@@ -165,7 +165,8 @@ class _ComicReaderScreenState extends State<ComicReaderScreen> {
         onKeyEvent: (node, event) {
           if (event is KeyDownEvent) {
             if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-              _readerControllerEvent.broadcast(_ReaderControllerEventArgs("UP"));
+              _readerControllerEvent
+                  .broadcast(_ReaderControllerEventArgs("UP"));
               return KeyEventResult.handled;
             }
             if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
@@ -862,8 +863,10 @@ abstract class _ComicReaderState extends State<_ComicReader> {
 
   double _bottomBarHeight() {
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      if (widget.readerType == ReaderType.webtoon || widget.readerType == ReaderType.webToonFreeZoom) {
-        if (widget.readerDirection == ReaderDirection.leftToRight || widget.readerDirection == ReaderDirection.rightToLeft) {
+      if (widget.readerType == ReaderType.webtoon ||
+          widget.readerType == ReaderType.webToonFreeZoom) {
+        if (widget.readerDirection == ReaderDirection.leftToRight ||
+            widget.readerDirection == ReaderDirection.rightToLeft) {
           return 0;
         }
       }
@@ -1235,13 +1238,19 @@ class _ComicReaderGalleryState extends _ComicReaderState {
     _preloadJump(widget.startIndex, init: true);
   }
 
-  void _reloadImage(int index) {
+  void _reloadImage(int index) async {
     if (mounted) {
-      // 清除图片缓存
       final oldProvider =
           PageImageProvider(widget.chapter.id, widget.chapter.images[index]);
-      imageCache.evict(oldProvider);
+      await oldProvider.evict();
+      await methods.deleteJmPageImageCache(
+        widget.chapter.id,
+        widget.chapter.images[index],
+      );
       debugPrient("evict ${widget.chapter.images[index]}");
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _reloadKeys[index] = (_reloadKeys[index] ?? 0) + 1;
       });
@@ -1757,12 +1766,19 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
     }
   }
 
-  void _reloadImage(int index) {
+  void _reloadImage(int index) async {
     if (mounted) {
+      final oldProvider = ips[index];
+      await oldProvider.evict();
+      await methods.deleteJmPageImageCache(
+        widget.chapter.id,
+        widget.chapter.images[index],
+      );
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _imageProviderKeys[index] = (_imageProviderKeys[index] ?? 0) + 1;
-        // 清除图片缓存
-        imageCache.evict(ips[index]);
         ips[index] =
             PageImageProvider(widget.chapter.id, widget.chapter.images[index]);
         _buildOptions();
