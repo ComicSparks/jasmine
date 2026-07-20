@@ -631,14 +631,6 @@ class Methods {
     );
   }
 
-  Future<String> getProServerName() async {
-    return await _invoke("get_pro_server_name", "");
-  }
-
-  Future setProServerName(String serverName) async {
-    return await _invoke("set_pro_server_name", serverName);
-  }
-
   Future<bool> verifyAuthentication() async {
     return await _channel.invokeMethod("verifyAuthentication");
   }
