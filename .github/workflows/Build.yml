@@ -29,7 +29,7 @@ jobs:
             flutter_version: '3.29.3'
             flutter_channel: 'stable'
           - target: windows
-            host: windows-latest
+            host: windows-2022
             flutter_version: '3.29.3'
             flutter_channel: 'stable'
           - target: macos

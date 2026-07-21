@@ -34,6 +34,19 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^1.0.0
 
+# Xcode 26+ Swift 6.3 编译修复，见 https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809
+dependency_overrides:
+  flutter_inappwebview_macos:
+    git:
+      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
+      ref: fc33a449
+      path: flutter_inappwebview_macos
+  flutter_inappwebview_ios:
+    git:
+      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
+      ref: fc33a449
+      path: flutter_inappwebview_ios
+
 flutter:
   uses-material-design: true
   assets:

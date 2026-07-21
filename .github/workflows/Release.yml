@@ -54,7 +54,7 @@ jobs:
           host_dict["android-arm64"]="ubuntu-latest"
           host_dict["android-arm32"]="ubuntu-latest"
           host_dict["android-core"]="ubuntu-latest"
-          host_dict["windows"]="windows-latest"
+          host_dict["windows"]="windows-2022"
           host_dict["linux"]="ubuntu-latest"
           host_dict["macos"]="macos-latest"
           export RELEASE=$(gh release view $VERSION --json id -q .id || echo "NOT_FOUND")
