@@ -50,13 +50,13 @@ jobs:
           asset_dict["linux"]="${{ github.event.repository.name }}-$VERSION.AppImage"
           asset_dict["macos"]="${{ github.event.repository.name }}-$VERSION.dmg"
           declare -A host_dict
-          host_dict["ios"]="macos-latest"
+          host_dict["ios"]="macos-14"
           host_dict["android-arm64"]="ubuntu-latest"
           host_dict["android-arm32"]="ubuntu-latest"
           host_dict["android-core"]="ubuntu-latest"
           host_dict["windows"]="windows-2022"
           host_dict["linux"]="ubuntu-latest"
-          host_dict["macos"]="macos-latest"
+          host_dict["macos"]="macos-14"
           export RELEASE=$(gh release view $VERSION --json id -q .id || echo "NOT_FOUND")
           echo "RELEASE : $RELEASE"
           if [ "$RELEASE" == "NOT_FOUND" ]; then

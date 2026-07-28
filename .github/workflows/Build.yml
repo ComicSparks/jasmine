@@ -33,11 +33,11 @@ jobs:
             flutter_version: '3.29.3'
             flutter_channel: 'stable'
           - target: macos
-            host: macos-latest
+            host: macos-14
             flutter_version: '3.29.3'
             flutter_channel: 'stable'
           - target: ios
-            host: macos-latest
+            host: macos-14
             flutter_version: '3.29.3'
             flutter_channel: 'stable'
           - target: android-arm32
