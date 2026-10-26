@@ -16,6 +16,7 @@ import 'package:jasmine/configs/network_api_host.dart';
 import 'package:jasmine/configs/network_cdn_host.dart';
 import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/screens/downloads_exports_screen2.dart';
+import 'package:jasmine/screens/favorites_export_screen.dart';
 
 import '../basic/commons.dart';
 import '../basic/web_dav_sync.dart';
@@ -230,6 +231,16 @@ class _SettingsState extends State<SettingsScreen> {
                 createFavoriteFolderItemTile(context),
                 deleteFavoriteFolderItemTile(context),
                 renameFavoriteFolderItemTile(context),
+                ListTile(
+                  title: const Text("导出收藏夹到表格文件"),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const FavoritesExportScreen(),
+                      ),
+                    );
+                  },
+                ),
                 const Divider(),
                 ListTile(
                   onTap: () async {

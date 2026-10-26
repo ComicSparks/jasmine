@@ -173,6 +173,31 @@ class Methods {
     );
   }
 
+  Future<Favorite> favoritesForExport(int folderId, int page, String o) async {
+    return Favorite.fromJson(
+      jsonDecode(await _invoke("favorites_for_export", {
+        "folder_id": folderId,
+        "page": page,
+        "o": o,
+      })),
+    );
+  }
+
+  Future<String> writeFavoritesXlsx(
+    String dir,
+    List<Map<String, dynamic>> rows, {
+    String? filenameHint,
+  }) async {
+    final params = <String, dynamic>{
+      "dir": dir,
+      "rows": rows,
+    };
+    if (filenameHint != null && filenameHint.isNotEmpty) {
+      params["filename_hint"] = filenameHint;
+    }
+    return jsonDecode(await _invoke("write_favorites_xlsx", params));
+  }
+
   Future<Favorite> favorite() async {
     return Favorite.fromJson(
       jsonDecode(await _invoke("favorite", "")),
