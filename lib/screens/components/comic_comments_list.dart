@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/comment_seal.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
@@ -144,6 +145,40 @@ class _ComicCommentsListState extends State<ComicCommentsList>
   }
 }
 
+Widget _buildSealedComment(BuildContext context) {
+  final theme = Theme.of(context);
+  return InkWell(
+    onTap: () {},
+    child: Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            width: .25,
+            style: BorderStyle.solid,
+            color: Colors.grey.shade500.withOpacity(.5),
+          ),
+          bottom: BorderSide(
+            width: .25,
+            style: BorderStyle.solid,
+            color: Colors.grey.shade500.withOpacity(.5),
+          ),
+        ),
+      ),
+      child: Center(
+        child: Text(
+          "被封印的评论",
+          style: TextStyle(
+            fontSize: 12,
+            color: (theme.textTheme.bodyMedium?.color ?? Colors.black)
+                .withOpacity(.3),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 Widget _buildComment(
   BuildContext context,
   Comment comment,
@@ -151,6 +186,9 @@ Widget _buildComment(
   String? mode,
   bool gotoComic,
 ) {
+  if (matchCommentSealed(comment.content)) {
+    return _buildSealedComment(context);
+  }
   return InkWell(
     onTap: () {
       if (!jumpList) {
@@ -245,6 +283,9 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
 
   @override
   Widget build(BuildContext context) {
+    if (matchCommentSealed(widget.comment.content)) {
+      return _buildSealedComment(context);
+    }
     final contentFontSize = (Theme.of(context).textTheme.bodyMedium?.fontSize ??
             14) +
         currentFontSizeAdjust(FontSizeAdjustType.fontSizeAdjustCommentContent);

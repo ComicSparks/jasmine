@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jasmine/configs/comment_seal.dart';
 import 'package:jasmine/configs/network_api_host.dart';
 import 'package:jasmine/configs/network_cdn_host.dart';
 import 'package:jasmine/configs/proxy.dart';
@@ -47,6 +48,7 @@ class NetworkSettingScreen extends StatelessWidget {
           apiHostSetting(),
           cdnHostSetting(),
           proxySetting(),
+          commentSealWordsSetting(),
         ],
       ),
     );
