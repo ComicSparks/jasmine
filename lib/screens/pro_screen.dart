@@ -72,6 +72,7 @@ class _ProScreenState extends State<ProScreen> {
               "登录账号才能确认发电状态\n"
               "点击\"我曾经发过电\"进同步发电状态\n"
               "点击\"我刚才发了电\"兑换作者给您的礼物卡\n"
+              "更换\"发电方式\"可能解决FAIL问题\n"
               "去\"关于\"界面找到维护地址用爱发电",
             ),
           ),
@@ -134,6 +135,8 @@ class _ProScreenState extends State<ProScreen> {
               setState(() {});
             },
           ),
+          const Divider(),
+          const ProServerNameWidget(),
           const Divider(),
           ...patProWidgets(),
           const Divider(),
@@ -280,5 +283,155 @@ class _ProScreenState extends State<ProScreen> {
     await reloadIsPro();
     defaultToast(context, "已清除");
     setState(() {});
+  }
+}
+
+class ProServerNameWidget extends StatefulWidget {
+  const ProServerNameWidget({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _ProServerNameWidgetState();
+}
+
+const _defaultProServerId = "ilsfsfkt75kp2nnfievnqcjmza0ooksc";
+
+const _proServerIds = <String>[
+  "ORI",
+  "jdtvmstd22deytdzenvydyil3e0jkxfu",
+  "mek5hrs65poai2eqjjofqr7ynu0nxkqx",
+  "6h2odtaft7fuvssx6v5b73pwie0dfgvm",
+  "ilsfsfkt75kp2nnfievnqcjmza0ooksc",
+  "wuwjgjgautzqf6ybwmma6e2pw40iilcy",
+  "phuto27lxoqo4skduakcs4siwu0ffwoh",
+  "4sfkal33ch44fle6u6smhwufri0cmgnv",
+];
+
+final _proServerHost = RegExp(
+  r'^([a-z0-9]+)\.lambda-url\.([a-z0-9-]+)\.on\.aws$',
+);
+final _proServerIdPattern = RegExp(r'^[a-z0-9]+$');
+final _proServerRegionPattern = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)+$');
+
+String? _normalizeProServerInput(String raw) {
+  var text = raw.trim().toLowerCase();
+  if (text.isEmpty) {
+    return null;
+  }
+  if (text == "ori") {
+    return "ORI";
+  }
+  text = text.replaceFirst(RegExp(r'^https?://'), '');
+  text = text.split('/').first;
+  final host = _proServerHost.firstMatch(text);
+  if (host != null) {
+    final id = host.group(1)!;
+    if (_proServerIds.contains(id)) {
+      return id;
+    }
+    return "$id|${host.group(2)!}";
+  }
+  if (!_proServerIdPattern.hasMatch(text)) {
+    return null;
+  }
+  if (text == "ori") {
+    return "ORI";
+  }
+  for (final id in _proServerIds) {
+    if (id.toLowerCase() == text) {
+      return id;
+    }
+  }
+  return null;
+}
+
+Future<String?> _inputProServerId(BuildContext context) async {
+  final idController = TextEditingController();
+  final result = await showDialog<String>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("输入发电 id"),
+        content: TextField(
+          controller: idController,
+          decoration: const InputDecoration(
+            hintText: "id",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("取消"),
+          ),
+          TextButton(
+            onPressed: () {
+              final saved = _normalizeProServerInput(idController.text);
+              if (saved == null) {
+                defaultToast(context, "id 无效");
+                return;
+              }
+              Navigator.of(context).pop(saved);
+            },
+            child: const Text("保存"),
+          ),
+        ],
+      );
+    },
+  );
+  idController.dispose();
+  return result;
+}
+
+class _ProServerNameWidgetState extends State<ProServerNameWidget> {
+  String _serverName = "";
+
+  @override
+  void initState() {
+    methods.getProServerName().then((value) {
+      setState(() {
+        _serverName = value;
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text("发电方式"),
+      subtitle: Text(_loadServerName()),
+      onTap: () async {
+        var serverName = await chooseMapDialog(
+          context,
+          title: "选择发电方式",
+          values: {
+            for (final id in _proServerIds) id: id,
+            "手动输入": "__manual__",
+          },
+        );
+        if (serverName == "__manual__") {
+          serverName = await _inputProServerId(context);
+        }
+        if (serverName != null && serverName.isNotEmpty) {
+          final name = serverName;
+          await methods.setProServerName(name);
+          setState(() {
+            _serverName = name;
+          });
+        }
+      },
+    );
+  }
+
+  String _loadServerName() {
+    if (_proServerIds.contains(_serverName)) {
+      return _serverName;
+    }
+    final parts = _serverName.split('|');
+    if (parts.length == 2 &&
+        _proServerIdPattern.hasMatch(parts[0]) &&
+        _proServerRegionPattern.hasMatch(parts[1])) {
+      return parts[0];
+    }
+    return _defaultProServerId;
   }
 }

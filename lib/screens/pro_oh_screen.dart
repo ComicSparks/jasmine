@@ -5,6 +5,7 @@ import 'package:jasmine/basic/log.dart';
 import '../basic/methods.dart';
 import '../configs/is_pro.dart';
 import 'components/right_click_pop.dart';
+import 'pro_screen.dart';
 
 class ProOhScreen extends StatefulWidget {
   const ProOhScreen({super.key});
@@ -77,6 +78,8 @@ class _ProScreenState extends State<ProOhScreen> {
               setState(() {});
             },
           ),
+          const Divider(),
+          const ProServerNameWidget(),
           const Divider(),
         ],
       ),
