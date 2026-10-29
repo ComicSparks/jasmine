@@ -306,80 +306,8 @@ const _proServerIds = <String>[
   "4sfkal33ch44fle6u6smhwufri0cmgnv",
 ];
 
-final _proServerHost = RegExp(
-  r'^([a-z0-9]+)\.lambda-url\.([a-z0-9-]+)\.on\.aws$',
-);
 final _proServerIdPattern = RegExp(r'^[a-z0-9]+$');
 final _proServerRegionPattern = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)+$');
-
-String? _normalizeProServerInput(String raw) {
-  var text = raw.trim().toLowerCase();
-  if (text.isEmpty) {
-    return null;
-  }
-  if (text == "ori") {
-    return "ORI";
-  }
-  text = text.replaceFirst(RegExp(r'^https?://'), '');
-  text = text.split('/').first;
-  final host = _proServerHost.firstMatch(text);
-  if (host != null) {
-    final id = host.group(1)!;
-    if (_proServerIds.contains(id)) {
-      return id;
-    }
-    return "$id|${host.group(2)!}";
-  }
-  if (!_proServerIdPattern.hasMatch(text)) {
-    return null;
-  }
-  if (text == "ori") {
-    return "ORI";
-  }
-  for (final id in _proServerIds) {
-    if (id.toLowerCase() == text) {
-      return id;
-    }
-  }
-  return null;
-}
-
-Future<String?> _inputProServerId(BuildContext context) async {
-  final idController = TextEditingController();
-  final result = await showDialog<String>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("输入发电 id"),
-        content: TextField(
-          controller: idController,
-          decoration: const InputDecoration(
-            hintText: "id",
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("取消"),
-          ),
-          TextButton(
-            onPressed: () {
-              final saved = _normalizeProServerInput(idController.text);
-              if (saved == null) {
-                defaultToast(context, "id 无效");
-                return;
-              }
-              Navigator.of(context).pop(saved);
-            },
-            child: const Text("保存"),
-          ),
-        ],
-      );
-    },
-  );
-  idController.dispose();
-  return result;
-}
 
 class _ProServerNameWidgetState extends State<ProServerNameWidget> {
   String _serverName = "";
@@ -400,17 +328,13 @@ class _ProServerNameWidgetState extends State<ProServerNameWidget> {
       title: const Text("发电方式"),
       subtitle: Text(_loadServerName()),
       onTap: () async {
-        var serverName = await chooseMapDialog(
+        final serverName = await chooseMapDialog(
           context,
           title: "选择发电方式",
           values: {
             for (final id in _proServerIds) id: id,
-            "手动输入": "__manual__",
           },
         );
-        if (serverName == "__manual__") {
-          serverName = await _inputProServerId(context);
-        }
         if (serverName != null && serverName.isNotEmpty) {
           final name = serverName;
           await methods.setProServerName(name);
