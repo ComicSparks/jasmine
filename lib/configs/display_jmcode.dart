@@ -20,26 +20,17 @@ bool currentDisplayJmcode() {
   return _displayJmcode;
 }
 
-Future<void> _chooseDisplayJmcode(BuildContext context) async {
-  String? result = await chooseListDialog<String>(context,
-      title: "显示漫画代码", values: ["是", "否"]);
-  if (result != null) {
-    var target = result == "是";
-    await methods.saveProperty(_propertyName, "$target");
-    _displayJmcode = target;
-  }
-}
-
 Widget displayJmcodeSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
-      return ListTile(
-        title: const Text("显示漫画代码"),
-        subtitle: Text(_displayJmcode ? "是" : "否"),
-        onTap: () async {
-          await _chooseDisplayJmcode(context);
+      return SwitchListTile(
+        value: _displayJmcode,
+        onChanged: (value) async {
+          await methods.saveProperty(_propertyName, "$value");
+          _displayJmcode = value;
           setState(() {});
         },
+        title: const Text("显示漫画代码"),
       );
     },
   );

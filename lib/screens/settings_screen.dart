@@ -221,6 +221,28 @@ class _SettingsState extends State<SettingsScreen> {
         child: Column(
           children: [
             ExpansionTile(
+              leading: const Icon(Icons.palette),
+              title: const Text('界面'),
+              children: [
+                const Divider(),
+                disableRecommendContentSetting(),
+                const Divider(),
+                appOrientationWidget(),
+                const Divider(),
+                categoriesSortSetting(context),
+                themeSetting(context),
+                const Divider(),
+                displayJmcodeSetting(),
+                searchTitleWordsSetting(),
+                const Divider(),
+                ...fontSizeAdjustSettings(),
+                const Divider(),
+                _startupImageSettingTile(context),
+                if (_startupImageExists) _deleteStartupImageTile(context),
+                const Divider(),
+              ],
+            ),
+            ExpansionTile(
               leading: const Icon(Icons.manage_accounts),
               title: const Text('用户和网络'),
               children: [
@@ -276,6 +298,24 @@ class _SettingsState extends State<SettingsScreen> {
               ],
             ),
             ExpansionTile(
+              leading: const Icon(Icons.download),
+              title: const Text('下载和导出'),
+              children: [
+                const Divider(),
+                exportRenameSetting(),
+                downloadAndExportToSetting(),
+                const Divider(),
+                ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (c) => const DownloadsExportScreen2()));
+                  },
+                  title: const Text("导出下载到目录(即使没有下载完)"),
+                ),
+                const Divider(),
+              ],
+            ),
+            ExpansionTile(
               leading: Icon(Icons.backup),
               title: Text('同步'),
               children: [
@@ -298,23 +338,12 @@ class _SettingsState extends State<SettingsScreen> {
                 const Divider(),
                 _resetBrowserTile(context),
                 const Divider(),
-                _startupImageSettingTile(context),
-                if (_startupImageExists) _deleteStartupImageTile(context),
-                const Divider(),
-                disableRecommendContentSetting(),
                 if (isPro) ...[
-                  const Divider(),
                   autoUpdateCheckSetting(),
                   ignoreUpgradePopSetting(),
                   const Divider(),
                 ],
-                const Divider(),
                 ignoreVewLogSetting(),
-                const Divider(),
-                appOrientationWidget(),
-                const Divider(),
-                categoriesSortSetting(context),
-                themeSetting(context),
                 const Divider(),
                 androidDisplayModeSetting(),
                 const Divider(),
@@ -325,22 +354,6 @@ class _SettingsState extends State<SettingsScreen> {
                 comicSealTitleWordsSetting(),
                 const Divider(),
                 authenticationSetting(),
-                const Divider(),
-                exportRenameSetting(),
-                downloadAndExportToSetting(),
-                const Divider(),
-                displayJmcodeSetting(),
-                const Divider(),
-                ListTile(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (c) => const DownloadsExportScreen2()));
-                  },
-                  title: const Text("导出下载到目录(即使没有下载完)"),
-                ),
-                const Divider(),
-                searchTitleWordsSetting(),
-                ...fontSizeAdjustSettings(),
                 const Divider(),
               ],
             ),

@@ -111,7 +111,7 @@ class _ProScreenState extends State<ProScreen> {
                 defaultToast(context, "SUCCESS");
               } catch (e, s) {
                 debugPrient("$e\n$s");
-                defaultToast(context, "FAIL");
+                defaultToast(context, _proErrorMessage(e));
               }
               await reloadIsPro();
               setState(() {});
@@ -128,7 +128,7 @@ class _ProScreenState extends State<ProScreen> {
                   defaultToast(context, "SUCCESS");
                 } catch (e, s) {
                   debugPrient("$e\n$s");
-                  defaultToast(context, "FAIL");
+                  defaultToast(context, _proErrorMessage(e));
                 }
               }
               await reloadIsPro();
@@ -358,4 +358,33 @@ class _ProServerNameWidgetState extends State<ProServerNameWidget> {
     }
     return _defaultProServerId;
   }
+}
+
+String _proErrorMessage(Object e) {
+  var text = e.toString();
+  const prefixes = ['Bad state: ', 'Exception: ', 'Error: '];
+  for (final prefix in prefixes) {
+    if (text.startsWith(prefix)) {
+      text = text.substring(prefix.length);
+      break;
+    }
+  }
+  text = text.trim();
+  if (text.isEmpty) {
+    text = 'SERVER_FAILED';
+  }
+  const messages = <String, String>{
+    'NETWORK_TIMEOUT': '网络超时，请检查网络或更换发电方式',
+    'NETWORK_UNREACHABLE': '连接不上服务器，请检查网络或更换发电方式',
+    'SERVER_FAILED': '服务器处理失败',
+    'SERVER_RESPONSE_INVALID': '服务器返回异常',
+    'REQUEST_INVALID': '请求无效',
+    'ORDER_NOT_SYNCED': '订单尚未同步，请稍后再试',
+    'ORDER_ALREADY_USED': '订单已被使用',
+    'ORDER_AMOUNT_INVALID': '订单金额无效',
+    'TICKET_NOT_FOUND': '兑换券不存在',
+    'TICKET_ALREADY_USED': '兑换券已被使用',
+    'TICKET_EVENT_USED': '活动兑换券已参与',
+  };
+  return messages[text] ?? text;
 }

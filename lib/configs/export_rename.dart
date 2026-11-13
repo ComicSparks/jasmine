@@ -15,39 +15,24 @@ bool currentExportRename() {
   return _exportRename;
 }
 
-Future<void> _chooseExportRename(BuildContext context) async {
-  String? result = await chooseListDialog<String>(context,
-      title: "导出的时候重新命名", values: ["是", "否"]);
-  if (result != null) {
-    var target = result == "是";
-    await methods.saveProperty(_propertyName, "$target");
-    _exportRename = target;
-  }
-}
-
 Widget exportRenameSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
-      return ListTile(
+      return SwitchListTile(
+        value: _exportRename,
+        onChanged: !isPro
+            ? null
+            : (value) async {
+                await methods.saveProperty(_propertyName, "$value");
+                _exportRename = value;
+                setState(() {});
+              },
         title: Text(
           "导出的时候重新命名",
           style: TextStyle(
             color: !isPro ? Colors.grey : null,
           ),
         ),
-        subtitle: Text(
-          _exportRename ? "是" : "否",
-          style: TextStyle(
-            color: !isPro ? Colors.grey : null,
-          ),
-        ),
-        onTap: () async {
-          if (!isPro) {
-            return;
-          }
-          await _chooseExportRename(context);
-          setState(() {});
-        },
       );
     },
   );
