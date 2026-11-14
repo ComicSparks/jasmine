@@ -158,7 +158,7 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           cmdline-tools-version: 8512546
-          packages: 'platform-tools platforms;android-32 build-tools;30.0.2 ndk;${{ env.NDK_VERSION }}'
+          packages: 'platform-tools platforms;android-36 build-tools;30.0.2 ndk;${{ env.NDK_VERSION }} ndk;27.0.12077973'
 
       - name: Install libfuse2 (Linux)
         if: matrix.config.target == 'linux'
