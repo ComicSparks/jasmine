@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:jasmine/configs/content_convert.dart';
 
 import '../../basic/methods.dart';
 import 'images.dart';
@@ -43,9 +44,9 @@ class ComicDownloadCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(comic.name, style: titleStyle),
+                CcText(comic.name, style: titleStyle),
                 Container(height: 4),
-                Text(_author(comic.author), style: authorStyle),
+                CcText(_author(comic.author), style: authorStyle),
                 Container(height: 4),
                 _buildCategoryRow(),
                 Container(height: 4),
@@ -111,7 +112,7 @@ class ComicDownloadCard extends StatelessWidget {
       return [];
     }
     return [
-      Text(category.title!),
+      CcText(category.title!),
       Container(width: 15),
     ];
   }

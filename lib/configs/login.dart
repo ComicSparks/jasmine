@@ -7,6 +7,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/configs/is_pro.dart';
 
 enum LoginStatus {
@@ -88,7 +89,7 @@ Widget deleteFavoriteFolderItemTile(BuildContext context) {
         return;
       }
       var j = favData.map((i) {
-        return MapEntry(i.name, i.fid);
+        return MapEntry(ccConvert(i.name), i.fid);
       }).toList();
       j.add(const MapEntry("默认 / 不删除", 0));
       var v = await chooseMapDialog<int>(
@@ -114,7 +115,7 @@ Widget renameFavoriteFolderItemTile(BuildContext context) {
         return;
       }
       var j = favData.map((i) {
-        return MapEntry(i.name, i.fid);
+        return MapEntry(ccConvert(i.name), i.fid);
       }).toList();
       j.add(const MapEntry("默认 / 不重命名", 0));
       var v = await chooseMapDialog<int>(

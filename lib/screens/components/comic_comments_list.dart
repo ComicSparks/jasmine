@@ -5,6 +5,7 @@ import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/configs/app_font_size.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/screens/components/item_builder.dart';
 
 import '../comic_info_screen.dart';
@@ -344,7 +345,7 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         alignment: WrapAlignment.spaceBetween,
                         children: [
-                          Text(comment.nickname, style: nameStyle),
+                          CcText(comment.nickname, style: nameStyle),
                           Text(
                             comment.addtime,
                             style: datetimeStyle,
@@ -429,7 +430,8 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
                           .replaceAll("</div>", ""),
                     );
                   },
-                  child: Text.rich(
+                  child: CcBuilder(
+                    (context) => Text.rich(
                     TextSpan(
                       children: content.length < 200
                           ? [...parseCommentBody(content)]
@@ -459,6 +461,7 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
                       fontSize: contentFontSize,
                     ),
                   ),
+                  ),
                 ),
                 ...widget.gotoComic
                     ? [
@@ -479,7 +482,7 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
                             ) {
                               return SizedBox(
                                 width: constraints.maxWidth,
-                                child: Text(
+                                child: CcText(
                                   comment.name,
                                   style: gotoComicStyle,
                                   textAlign: TextAlign.right,
@@ -507,7 +510,7 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
       var list = comment.split(regex);
       var spans = <InlineSpan>[];
       for (var i = 0; i < list.length; i++) {
-        spans.add(TextSpan(text: list[i]));
+        spans.add(TextSpan(text: ccConvert(list[i])));
         if (i < list.length - 1) {
           spans.add(WidgetSpan(
             alignment: PlaceholderAlignment.middle,
@@ -522,7 +525,7 @@ class _ComicCommentItemState extends State<_ComicCommentItem> {
       }
       return spans;
     }
-    return [TextSpan(text: comment)];
+    return [TextSpan(text: ccConvert(comment))];
   }
 }
 

@@ -7,6 +7,7 @@ import 'package:jasmine/screens/comic_info_screen.dart';
 import 'package:jasmine/screens/components/types.dart';
 
 import '../../basic/commons.dart';
+import '../../configs/content_convert.dart';
 import 'comic_info_card.dart';
 import 'images.dart';
 
@@ -102,7 +103,7 @@ class _ComicListState extends State<ComicList> {
             ),
             Container(width: 10),
             Expanded(
-              child: Text(
+              child: CcText(
                 comic.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -283,7 +284,7 @@ class _ComicListState extends State<ComicList> {
                       padding: const EdgeInsets.all(3),
                       color: Colors.black.withAlpha(180),
                       width: constraints.maxWidth,
-                      child: Text(
+                      child: CcText(
                         "${widget.data[i].name}\n",
                         maxLines: 2,
                         textAlign: TextAlign.center,
@@ -393,7 +394,7 @@ class _ComicListState extends State<ComicList> {
               width: width,
               height: 50,
               padding: const EdgeInsets.only(left: 5, right: 5, bottom: 10),
-              child: Text(
+              child: CcText(
                 "${widget.data[i].name}\n",
                 maxLines: 2,
                 textAlign: TextAlign.center,

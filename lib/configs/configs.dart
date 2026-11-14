@@ -6,6 +6,7 @@ import 'package:jasmine/configs/android_version.dart';
 import 'package:jasmine/configs/always_enter_browser.dart';
 import 'package:jasmine/configs/app_font_size.dart';
 import 'package:jasmine/configs/app_orientation.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/configs/display_jmcode.dart';
 import 'package:jasmine/configs/download_thread_count.dart';
 import 'package:jasmine/configs/drag_region_lock.dart';
@@ -92,6 +93,7 @@ Future initConfigs(BuildContext context) async {
   await initExportRename();
   await initLogin(context);
   await initDisplayJmcode();
+  await initContentConvert();
   await initSearchTitleWords();
   await initCategoriesSort();
   await initAuthentication();

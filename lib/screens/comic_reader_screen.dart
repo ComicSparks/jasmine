@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/configs/reader_controller_type.dart';
 import 'package:jasmine/configs/drag_region_lock.dart';
 import 'package:jasmine/configs/gesture_speed.dart';
@@ -704,7 +705,7 @@ abstract class _ComicReaderState extends State<_ComicReader> {
   Widget _buildAppBar() => _fullScreen
       ? Container()
       : AppBar(
-          title: Text(widget.chapter.name),
+          title: CcText(widget.chapter.name),
           actions: [
             IconButton(
               onPressed: _onChooseEp,

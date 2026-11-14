@@ -4,6 +4,7 @@ import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/entities.dart';
 import 'package:jasmine/screens/comic_search_screen.dart';
 
+import '../../configs/content_convert.dart';
 import '../../configs/display_jmcode.dart';
 import '../../configs/search_title_words.dart';
 import 'images.dart';
@@ -52,7 +53,7 @@ class ComicInfoCard extends StatelessWidget {
               children: [
                 ...link
                     ? [
-                  Text.rich(TextSpan(children: [
+                  CcBuilder((context) => Text.rich(TextSpan(children: [
                     currentSearchTitleWords()
                         ? TextSpan(
                       style: titleStyle,
@@ -63,7 +64,7 @@ class ComicInfoCard extends StatelessWidget {
                         },
                     )
                         : TextSpan(
-                      text: comic.name,
+                      text: ccConvert(comic.name),
                       style: titleStyle,
                       children: [],
                       recognizer: LongPressGestureRecognizer()
@@ -86,9 +87,9 @@ class ComicInfoCard extends StatelessWidget {
                       ),
                     ]
                         : [],
-                  ])),
+                  ]))),
                 ]
-                    : [Text(comic.name, style: titleStyle)],
+                    : [CcText(comic.name, style: titleStyle)],
                 Container(height: 4),
                 link
                     ? GestureDetector(
@@ -104,9 +105,9 @@ class ComicInfoCard extends StatelessWidget {
                         onLongPress: () {
                           confirmCopy(context, comic.author);
                         },
-                        child: Text(comic.author, style: authorStyle),
+                        child: CcText(comic.author, style: authorStyle),
                       )
-                    : Text(comic.author, style: authorStyle),
+                    : CcText(comic.author, style: authorStyle),
                 Container(height: 4),
                 _buildCategoryRow(),
                 if (comic.updateAt != null ||
@@ -147,7 +148,7 @@ class ComicInfoCard extends StatelessWidget {
     } else {
       text = categorySubTitle!;
     }
-    return Text(
+    return CcText(
       text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -184,10 +185,11 @@ class ComicInfoCard extends StatelessWidget {
       // start = match.end;
       // =======
       if (match.start > start) {
-        result.add(TextSpan(text: name.substring(start, match.start + 1)));
+        result.add(TextSpan(
+            text: ccConvert(name.substring(start, match.start + 1))));
       }
       result.add(TextSpan(
-        text: name.substring(match.start + 1, match.end - 1),
+        text: ccConvert(name.substring(match.start + 1, match.end - 1)),
         style: TextStyle(
           // 30%蓝色 叠加本该有的颜色
           color: Color.alphaBlend(Colors.blue.withOpacity(0.3),
@@ -205,12 +207,13 @@ class ComicInfoCard extends StatelessWidget {
           },
       ));
       if (match.start > start) {
-        result.add(TextSpan(text: name.substring(match.end - 1, match.end)));
+        result.add(
+            TextSpan(text: ccConvert(name.substring(match.end - 1, match.end))));
       }
       start = match.end;
     }
     if (start < name.length) {
-      result.add(TextSpan(text: name.substring(start)));
+      result.add(TextSpan(text: ccConvert(name.substring(start))));
     }
     return result;
   }

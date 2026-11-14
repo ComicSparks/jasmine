@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jasmine/configs/app_font_size.dart';
+import 'package:jasmine/configs/content_convert.dart';
 
 class TextPreviewScreen extends StatefulWidget {
   final String text;
@@ -38,7 +39,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: SelectableText(
+        child: CcSelectableText(
           widget.text,
           style: TextStyle(
             fontSize: contentFontSize,

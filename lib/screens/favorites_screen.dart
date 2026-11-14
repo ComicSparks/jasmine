@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/configs/login.dart';
 import 'package:jasmine/screens/components/comic_pager.dart';
 
@@ -25,7 +26,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   _chooseFolder() async {
     int? f = await chooseMapDialog(
       context,
-      values: _folderMap.map((key, value) => MapEntry(value, key)),
+      values: _folderMap.map(
+        (key, value) => MapEntry(key == 0 ? value : ccConvert(value), key),
+      ),
       title: "选择文件夹",
     );
     if (f != null) {
@@ -116,7 +119,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               children: [
                 const Icon(Icons.folder_copy_outlined, size: 15),
                 Container(width: 8),
-                Text(_folderMap[_folderId] ?? ""),
+                _folderId == 0
+                    ? Text(_folderMap[_folderId] ?? "")
+                    : CcText(_folderMap[_folderId] ?? ""),
               ],
             ),
           ),

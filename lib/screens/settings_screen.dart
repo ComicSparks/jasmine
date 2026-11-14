@@ -26,6 +26,7 @@ import '../configs/always_enter_browser.dart';
 import '../configs/categories_sort.dart';
 import '../configs/comic_seal.dart';
 import '../configs/comment_seal.dart';
+import '../configs/content_convert.dart';
 import '../configs/display_jmcode.dart';
 import '../configs/download_and_export_to.dart';
 import '../configs/esc_to_pop.dart';
@@ -233,6 +234,7 @@ class _SettingsState extends State<SettingsScreen> {
                 themeSetting(context),
                 const Divider(),
                 displayJmcodeSetting(),
+                contentConvertSetting(),
                 searchTitleWordsSetting(),
                 const Divider(),
                 ...fontSizeAdjustSettings(),

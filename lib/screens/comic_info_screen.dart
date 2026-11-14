@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/basic/navigator.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/configs/login.dart';
 import 'package:jasmine/screens/comic_search_screen.dart';
 import 'package:jasmine/screens/components/comic_info_card.dart';
@@ -65,7 +66,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
     return Scaffold(
       appBar: AppBar(
         title: widget.simple != null
-            ? Text(widget.simple?.name ?? "")
+            ? CcText(widget.simple?.name ?? "")
             : FutureBuilder(
                 future: _albumFuture,
                 builder: (BuildContext context,
@@ -74,7 +75,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                       snapshot.hasError) {
                     return const Text("");
                   }
-                  return Text(snapshot.requireData.name);
+                  return CcText(snapshot.requireData.name);
                 },
               ), //
         actions: [
@@ -277,7 +278,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(30)),
                   ),
-                  child: Text(
+                  child: CcText(
                     e,
                     style: TextStyle(
                       color: Colors.pink.shade500,
@@ -308,7 +309,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
       defaultToast(context, "收藏成功");
       if (data.isFavorite && favData.isNotEmpty) {
         var j = favData.map((i) {
-          return MapEntry(i.name, i.fid);
+          return MapEntry(ccConvert(i.name), i.fid);
         }).toList();
         j.add(const MapEntry("默认 / 不移动", 0));
         var v = await chooseMapDialog<int>(
@@ -398,8 +399,11 @@ class _ComicSerialsState extends State<_ComicSerials> {
                     .bodyMedium
                     ?.color
                     ?.withOpacity(.17),
-            child: Text(
-              e.sort + (e.name == "" ? "" : (" - ${e.name}")),
+            child: CcBuilder(
+              (context) => Text(
+                e.sort +
+                    (e.name == "" ? "" : (" - ${ccConvert(e.name)}")),
+              ),
             ),
           );
         }).toList(),
@@ -428,8 +432,11 @@ class _ComicSerialsState extends State<_ComicSerials> {
                     .bodyMedium
                     ?.color
                     ?.withOpacity(.17),
-            child: Text(
-              e.sort + (e.name == "" ? "" : (" - ${e.name}")),
+            child: CcBuilder(
+              (context) => Text(
+                e.sort +
+                    (e.name == "" ? "" : (" - ${ccConvert(e.name)}")),
+              ),
             ),
           );
         }).toList(),

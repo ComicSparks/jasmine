@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:jasmine/basic/entities.dart';
+import 'package:jasmine/configs/content_convert.dart';
 import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/screens/components/comic_download_card.dart';
 import 'package:jasmine/screens/components/item_builder.dart';
@@ -40,7 +41,7 @@ class _DownloadAlbumScreenState extends State<DownloadAlbumScreen> {
   Widget buildScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.album.name),
+        title: CcText(widget.album.name),
         actions: [
           IconButton(
             onPressed: () {
@@ -126,7 +127,7 @@ class _DownloadAlbumScreenState extends State<DownloadAlbumScreen> {
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(30)),
                   ),
-                  child: Text(
+                  child: CcText(
                     e,
                     style: TextStyle(
                       color: Colors.pink.shade500,
@@ -194,9 +195,11 @@ class _DownloadAlbumScreenState extends State<DownloadAlbumScreen> {
             _push(create, e.id, 0);
           },
           color: Colors.white,
-          child: Text(
-            e.sort + (e.name == "" ? "" : (" - ${e.name}")),
-            style: const TextStyle(color: Colors.black),
+          child: CcBuilder(
+            (context) => Text(
+              e.sort + (e.name == "" ? "" : (" - ${ccConvert(e.name)}")),
+              style: const TextStyle(color: Colors.black),
+            ),
           ),
         );
       }).toList(),

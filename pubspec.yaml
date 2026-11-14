@@ -3,10 +3,10 @@ description: jasmine comic browser
 
 publish_to: 'none'
 
-version: 1.7.22+50
+version: 1.7.23+51
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ^3.10.3
 
 dependencies:
   flutter:
@@ -28,6 +28,7 @@ dependencies:
   zoomable_positioned_list: ^1.1.0
   flutter_inappwebview: ^6.1.5
   url_launcher: ^6.3.2
+  flutter_opencc_plus: ^0.1.4
 
 dev_dependencies:
   flutter_test:

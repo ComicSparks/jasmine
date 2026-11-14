@@ -11,6 +11,7 @@ import 'package:jasmine/screens/settings_screen.dart';
 import 'package:jasmine/screens/view_log_screen.dart';
 
 import '../basic/platform.dart';
+import '../configs/content_convert.dart';
 import '../configs/daily_sign.dart';
 import '../configs/is_pro.dart';
 import 'components/badge.dart';
@@ -253,7 +254,7 @@ class _UserScreenState extends State<UserScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              CcText(
                 selfInfo.username,
                 style: TextStyle(
                   color: brightness == Brightness.light
