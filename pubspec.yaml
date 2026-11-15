@@ -28,7 +28,7 @@ dependencies:
   zoomable_positioned_list: ^1.1.0
   flutter_inappwebview: ^6.1.5
   url_launcher: ^6.3.2
-  flutter_opencc_plus: ^0.1.4
+  ffi: ^2.1.0
 
 dev_dependencies:
   flutter_test:

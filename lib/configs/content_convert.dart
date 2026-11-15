@@ -1,8 +1,11 @@
 /// 内容繁简体转换 (仅影响显示)
 
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:event/event.dart';
+import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_opencc_plus/flutter_opencc_plus.dart';
 import '../basic/commons.dart';
 import '../basic/methods.dart';
 
@@ -14,8 +17,9 @@ enum ContentConvertMode {
 
 const _propertyName = "contentConvertMode";
 ContentConvertMode _mode = ContentConvertMode.off;
-ZhConverter? _converter;
 final Map<String, String> _cache = {};
+_ZhFfi? _zhFfi;
+bool _zhFfiTried = false;
 
 final contentConvertEvent = Event<EventArgs>();
 
@@ -27,51 +31,92 @@ Future<void> initContentConvert() async {
   ));
 }
 
-String? _dataDir;
-
 Future<void> _applyMode(ContentConvertMode mode) async {
   _mode = mode;
   _cache.clear();
-  _converter?.dispose();
-  _converter = null;
-  try {
-    if (mode != ContentConvertMode.off) {
-      // iOS/Android 的词库在资源包内, 需要异步解压后才能同步转换
-      _dataDir ??= await resolveOpenCCDataDir();
-    }
-    switch (mode) {
-      case ContentConvertMode.off:
-        break;
-      case ContentConvertMode.s2t:
-        _converter = ZhConverter(OpenCCConfig.s2t, dataDir: _dataDir);
-        break;
-      case ContentConvertMode.t2s:
-        _converter = ZhConverter(OpenCCConfig.t2s, dataDir: _dataDir);
-        break;
-    }
-  } catch (e) {
-    // 转换器不可用时退化为不转换
-    debugPrint('content convert init failed: $e');
-    _converter = null;
+}
+
+_ZhFfi? _openZhFfi() {
+  if (_zhFfiTried) {
+    return _zhFfi;
   }
+  _zhFfiTried = true;
+  try {
+    final os = Platform.operatingSystem;
+    final DynamicLibrary lib;
+    if (os == 'android' || os == 'ohos') {
+      lib = DynamicLibrary.open('librust.so');
+    } else if (os == 'ios' || os == 'macos') {
+      lib = DynamicLibrary.process();
+    } else {
+      lib = DynamicLibrary.executable();
+    }
+    _zhFfi = _ZhFfi(
+      lib.lookupFunction<_ConvertNative, _ConvertDart>('convert_zh_ffi'),
+      lib.lookupFunction<_FreeNative, _FreeDart>('free_str_ffi'),
+    );
+  } catch (e) {
+    debugPrint('content convert unavailable: $e');
+    _zhFfi = null;
+  }
+  return _zhFfi;
 }
 
 /// 仅用于展示, 不要用于复制/编辑/保存/上传
 String ccConvert(String raw) {
-  final converter = _converter;
-  if (converter == null || raw.isEmpty) {
+  if (_mode == ContentConvertMode.off || raw.isEmpty) {
     return raw;
   }
-  return _cache.putIfAbsent(raw, () {
+  final cached = _cache[raw];
+  if (cached != null) {
+    return cached;
+  }
+  final ffi = _openZhFfi();
+  if (ffi == null) {
+    return raw;
+  }
+  try {
+    final converted = ffi.convert(_mode.name, raw);
     if (_cache.length > 4000) {
       _cache.clear();
     }
+    _cache[raw] = converted;
+    return converted;
+  } catch (e) {
+    debugPrint('content convert failed: $e');
+    return raw;
+  }
+}
+
+typedef _ConvertNative = Pointer<Utf8> Function(Pointer<Utf8>, Pointer<Utf8>);
+typedef _ConvertDart = Pointer<Utf8> Function(Pointer<Utf8>, Pointer<Utf8>);
+typedef _FreeNative = Void Function(Pointer<Utf8>);
+typedef _FreeDart = void Function(Pointer<Utf8>);
+
+class _ZhFfi {
+  final _ConvertDart _convert;
+  final _FreeDart _free;
+
+  _ZhFfi(this._convert, this._free);
+
+  String convert(String mode, String text) {
+    final modePtr = mode.toNativeUtf8();
+    final textPtr = text.toNativeUtf8();
     try {
-      return converter.convert(raw);
-    } catch (e) {
-      return raw;
+      final out = _convert(modePtr, textPtr);
+      if (out == nullptr) {
+        return text;
+      }
+      try {
+        return out.toDartString();
+      } finally {
+        _free(out);
+      }
+    } finally {
+      calloc.free(modePtr);
+      calloc.free(textPtr);
     }
-  });
+  }
 }
 
 /// 设置变更时重建, 用于 Text.rich 等需要自行调用 ccConvert 的场景
