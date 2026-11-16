@@ -55,6 +55,14 @@ Future initVersion() async {
   } catch (e) {
     _version = "dirty";
   }
+  if (_version.isEmpty) {
+    _version = "dirty";
+  }
+  try {
+    await methods.setMetricsVersion(_version);
+  } catch (e) {
+    debugPrint("set metrics version failed: $e");
+  }
   // 检查周期
   var vStr = await methods.loadProperty(_propertyName);
   if (vStr == "") {

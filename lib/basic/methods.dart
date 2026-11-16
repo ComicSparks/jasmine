@@ -52,6 +52,10 @@ class Methods {
     return _invoke("init_dart2", "");
   }
 
+  Future setMetricsVersion(String version) {
+    return _invoke("set_metrics_version", version);
+  }
+
   Future<Map<String, String>> configLinks() async {
     final rsp = await _invoke("config_links", "");
     final decoded = jsonDecode(rsp);
