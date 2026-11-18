@@ -34,6 +34,7 @@ import 'package:jasmine/configs/web_dav_username.dart';
 import 'auto_clean.dart';
 import 'categories_sort.dart';
 import 'download_and_export_to.dart';
+import 'download_ongoing_notification.dart';
 import 'export_path.dart';
 import 'export_rename.dart';
 import 'disable_recommend_content.dart';
@@ -90,6 +91,7 @@ Future initConfigs(BuildContext context) async {
   await initVolumeKeyControl();
   await initNoAnimation();
   await initDownloadAndExportTo();
+  await initDownloadOngoingNotification();
   await initExportRename();
   await initLogin(context);
   await initDisplayJmcode();

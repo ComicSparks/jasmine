@@ -29,6 +29,7 @@ import '../configs/comment_seal.dart';
 import '../configs/content_convert.dart';
 import '../configs/display_jmcode.dart';
 import '../configs/download_and_export_to.dart';
+import '../configs/download_ongoing_notification.dart';
 import '../configs/esc_to_pop.dart';
 import '../configs/disable_recommend_content.dart';
 import '../configs/export_rename.dart';
@@ -306,6 +307,7 @@ class _SettingsState extends State<SettingsScreen> {
                 const Divider(),
                 exportRenameSetting(),
                 downloadAndExportToSetting(),
+                downloadOngoingNotificationSetting(),
                 const Divider(),
                 ListTile(
                   onTap: () {

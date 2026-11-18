@@ -1,6 +1,7 @@
 package opensource.jmtt2mic
 
 import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -63,6 +64,13 @@ class MainActivity : FlutterActivity() {
                 )
                 "picturesDir" -> picturesDir().absolutePath
                 "verifyAuthentication" -> auth()
+                "showDownloadNotification" -> showDownloadNotification(
+                    call.stringArg("title") ?: "正在下载",
+                    call.stringArg("text") ?: "",
+                    call.intArg("progress"),
+                    call.intArg("max"),
+                )
+                "cancelDownloadNotification" -> cancelDownloadNotification()
                 else -> notImplementedToken
             }
         }
@@ -202,6 +210,53 @@ class MainActivity : FlutterActivity() {
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun MethodCall.stringArg(key: String): String? {
+        val value = argument<Any>(key)
+        return value as? String
+    }
+
+    private fun MethodCall.intArg(key: String): Int {
+        return when (val value = argument<Any>(key)) {
+            is Int -> value
+            is Long -> value.toInt()
+            is Number -> value.toInt()
+            else -> 0
+        }
+    }
+
+    private fun showDownloadNotification(
+        title: String,
+        text: String,
+        progress: Int,
+        max: Int,
+    ): Boolean {
+        val intent = Intent(this, DownloadForegroundService::class.java).apply {
+            putExtra(DownloadForegroundService.EXTRA_TITLE, title)
+            putExtra(DownloadForegroundService.EXTRA_TEXT, text)
+            putExtra(DownloadForegroundService.EXTRA_PROGRESS, progress)
+            putExtra(DownloadForegroundService.EXTRA_MAX, max)
+        }
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("DownloadNotification", "start failed", e)
+            false
+        }
+    }
+
+    private fun cancelDownloadNotification() {
+        try {
+            stopService(Intent(this, DownloadForegroundService::class.java))
+        } catch (e: Exception) {
+            Log.e("DownloadNotification", "stop failed", e)
+        }
     }
 
     fun storageRoot(): String {

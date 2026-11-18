@@ -430,6 +430,36 @@ class Methods {
     return 0;
   }
 
+  bool get _supportDownloadNotification {
+    final os = Platform.operatingSystem;
+    return os == 'android' || os == 'ohos';
+  }
+
+  Future<bool> showDownloadNotification({
+    required String title,
+    required String text,
+    required int progress,
+    required int max,
+  }) async {
+    if (!_supportDownloadNotification) {
+      return false;
+    }
+    final result = await _channel.invokeMethod("showDownloadNotification", {
+      "title": title,
+      "text": text,
+      "progress": progress,
+      "max": max,
+    });
+    return result == true;
+  }
+
+  Future<void> cancelDownloadNotification() async {
+    if (!_supportDownloadNotification) {
+      return;
+    }
+    await _channel.invokeMethod("cancelDownloadNotification", {});
+  }
+
   Future export_jm_jpegs(List<int> idList, String path, bool deleteExported) {
     return _invoke("export_jm_jpegs", {
       "comic_id": idList,
