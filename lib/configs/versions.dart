@@ -1,5 +1,7 @@
 import 'dart:async' show Future;
+import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -7,6 +9,7 @@ import 'package:jasmine/basic/commons.dart';
 import 'package:jasmine/basic/log.dart';
 import 'package:jasmine/basic/methods.dart';
 
+import 'hide_announcement.dart';
 import 'ignore_upgrade_pop.dart';
 
 const _defaultDownloadUrl = "https://cdn.comicsparks.work/download/jasmine";
@@ -44,6 +47,7 @@ late String _version;
 String? _latestVersion;
 String? _latestVersionInfo;
 String _downloadUrl = _defaultDownloadUrl;
+String _announcement = "";
 
 const _propertyName = "checkVersionPeriod";
 late int _period = -1;
@@ -121,6 +125,7 @@ Future _versionCheck() async {
   final localSemVer = _SemVer.parse(_version);
   if (localSemVer != null) {
     final config = await methods.appConfig();
+    _announcement = config["announcement"]?.toString() ?? "";
     final remoteLatestVersion = config["latestVersion"]?.toString();
     final remoteDownloadUrl = config["downloadUrl"]?.toString();
     if (remoteDownloadUrl != null && remoteDownloadUrl.isNotEmpty) {
@@ -221,33 +226,89 @@ String formatDateTimeToDateTime(DateTime c) {
 }
 
 var _display = true;
+var _versionGate = false;
+var _announcementBusy = false;
+var _announcementDone = false;
 
 void versionPop(BuildContext context) {
+  if (_versionGate) return;
   final latest = latestVersion;
-  if (latest == null || !_display) {
+  final showVersion = latest != null && _display && !currentIgnoreUpgradePop();
+  if (!showVersion) {
+    _announcementPop(context);
     return;
   }
 
   final force = _isForceUpgrade(currentVersion(), latest);
+  _display = false;
+  _versionGate = true;
   if (force) {
-    if (currentIgnoreUpgradePop()) {
-      return;
-    }
-    _display = false;
-    TopConfirm.topConfirm(
-      context,
-      "发现新版本",
-      "发现新版本 $latest，请立即更新后继续使用",
-      force: true,
-      primaryText: "去下载",
-      onPrimary: _openRelease,
-    );
+    _announcementPop(context).whenComplete(() {
+      if (!context.mounted) return;
+      TopConfirm.topConfirm(
+        context,
+        "发现新版本",
+        "发现新版本 $latest，请立即更新后继续使用",
+        force: true,
+        primaryText: "去下载",
+        onPrimary: _openRelease,
+      );
+    });
     return;
   }
 
-  if (!currentIgnoreUpgradePop()) {
-    _display = false;
-    TopConfirm.topConfirm(context, "发现新版本", "发现新版本 $latest , 请到关于页面更新");
+  TopConfirm.topConfirm(
+    context,
+    "发现新版本",
+    "发现新版本 $latest , 请到关于页面更新",
+    afterIKnown: () {
+      _versionGate = false;
+      _announcementPop(context);
+    },
+  );
+}
+
+Future<void> _announcementPop(BuildContext context) async {
+  if (currentHideAnnouncement() || _announcementDone || _announcementBusy) return;
+  final text = _announcement.trim();
+  if (text.isEmpty) return;
+  _announcementBusy = true;
+  try {
+    final hash = sha256.convert(utf8.encode(text)).toString();
+    final saved = await methods.loadProperty("announcement_read");
+    if (!context.mounted) return;
+    if (saved == hash) {
+      _announcementDone = true;
+      return;
+    }
+    _announcementDone = true;
+    final remember = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (c) => AlertDialog(
+        title: const Text("公告"),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 360),
+          child: SingleChildScrollView(child: Text(text)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text("关闭"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text("不再提醒"),
+          ),
+        ],
+      ),
+    );
+    if (remember == true) {
+      await methods.saveProperty("announcement_read", hash);
+    }
+  } catch (_) {
+  } finally {
+    _announcementBusy = false;
   }
 }
 

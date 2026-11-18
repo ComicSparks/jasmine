@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../basic/commons.dart';
@@ -140,6 +142,7 @@ class _ProScreenState extends State<ProScreen> {
           const Divider(),
           ...patProWidgets(),
           const Divider(),
+          const ReferralTiles(),
         ],
       ),
     );
@@ -358,6 +361,131 @@ class _ProServerNameWidgetState extends State<ProServerNameWidget> {
     }
     return _defaultProServerId;
   }
+}
+
+class ReferralTiles extends StatefulWidget {
+  const ReferralTiles({Key? key}) : super(key: key);
+
+  @override
+  State<ReferralTiles> createState() => _ReferralTilesState();
+}
+
+class _ReferralTilesState extends State<ReferralTiles> {
+  String _username = "";
+  String _referrer = "";
+  int _unbindWaitDays = 0;
+  int _campaignStart = 0;
+  int _campaignEnd = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    methods.loadLastLoginUsername().then((value) {
+      if (!mounted) return;
+      setState(() {
+        _username = value;
+      });
+    });
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final raw = await methods.referralCall('{"action":"local"}');
+      if (!mounted || raw.isEmpty) return;
+      _apply(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {}
+  }
+
+  Future<void> _referral(String payload, String ok) async {
+    try {
+      final raw = await methods.referralCall(payload);
+      if (!mounted) return;
+      if (raw.isNotEmpty) {
+        _apply(jsonDecode(raw) as Map<String, dynamic>);
+      }
+      defaultToast(context, ok);
+    } catch (e) {
+      if (mounted) defaultToast(context, _referralError(e));
+    }
+  }
+
+  void _apply(Map<String, dynamic> map) {
+    setState(() {
+      _referrer = (map["referrer"] ?? "").toString();
+      _unbindWaitDays = _asInt(map["unbind_wait_days"]);
+      _campaignStart = _asInt(map["campaign_start"]);
+      _campaignEnd = _asInt(map["campaign_end"]);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          title: const Text("推荐人"),
+          subtitle: Text(_referrer),
+          onTap: () async {
+            if (_username.isEmpty) {
+              defaultToast(context, "先登录");
+              return;
+            }
+            if (_referrer.isNotEmpty) return;
+            final name = await displayTextInputDialog(context, title: "填写推荐人用户名");
+            if (name == null || name.trim().isEmpty) return;
+            await _referral(
+              jsonEncode({"action": "bind", "referrer": name.trim()}),
+              "已绑定",
+            );
+          },
+          onLongPress: () async {
+            if (_referrer.isEmpty) return;
+            if (_unbindWaitDays > 0) {
+              defaultToast(context, "还有 $_unbindWaitDays 天");
+              return;
+            }
+            final ok = await confirmDialog(context, "解绑推荐人", "确定解绑推荐人？");
+            if (!ok || !context.mounted) return;
+            await _referral('{"action":"unbind"}', "已解绑");
+          },
+        ),
+        ListTile(
+          title: const Text("活动时间"),
+          subtitle: Text(_campaignLabel(_campaignStart, _campaignEnd)),
+        ),
+      ],
+    );
+  }
+}
+
+int _asInt(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? "") ?? 0;
+}
+
+String _campaignLabel(int start, int end) {
+  if (start <= 0 || end <= 0) return "";
+  String fmt(int seconds) {
+    final time = DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true).toLocal();
+    String two(int value) => value.toString().padLeft(2, "0");
+    return "${time.year}-${two(time.month)}-${two(time.day)} ${two(time.hour)}:${two(time.minute)}";
+  }
+
+  return "${fmt(start)} — ${fmt(end)}";
+}
+
+String _referralError(Object error) {
+  final text = error.toString();
+  final wait = RegExp(r"REFERRER_UNBIND_WAIT:(\d+)").firstMatch(text);
+  if (wait != null) return "还有 ${wait.group(1)} 天";
+  if (text.contains("REFERRER_SELF")) return "不能填写自己";
+  if (text.contains("REFERRER_LOCKED")) return "已经绑定了推荐人";
+  if (text.contains("REFERRER_MUTUAL")) return "不能互相绑定";
+  if (text.contains("REFERRER_NOT_BOUND")) return "还没有推荐人";
+  return text;
 }
 
 String _proErrorMessage(Object e) {

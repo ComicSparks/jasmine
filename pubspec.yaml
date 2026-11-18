@@ -3,7 +3,7 @@ description: jasmine comic browser
 
 publish_to: 'none'
 
-version: 1.7.24+51
+version: 1.7.25+52
 
 environment:
   sdk: ^3.10.3
@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  crypto: ^3.0.6
   flutter_svg: ^1.0.0
   flutter_styled_toast: ^2.0.0
   photo_view: ^0.14.0

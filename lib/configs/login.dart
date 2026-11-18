@@ -152,6 +152,7 @@ Future login(String username, String password, BuildContext context) async {
     final selfInfo = await methods.login(username, password);
     _selfInfo = selfInfo;
     _loginState = LoginStatus.loginSuccess;
+    methods.referralCall('{"action":"status"}').catchError((_) => "");
     checkDailySignStatus(context);
     fav(context);
   } catch (e, st) {

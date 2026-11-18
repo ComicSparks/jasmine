@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jasmine/basic/methods.dart';
 import 'package:jasmine/basic/platform.dart';
 import 'package:jasmine/configs/Authentication.dart';
 import 'package:jasmine/configs/android_display_mode.dart';
@@ -38,6 +39,7 @@ import 'download_ongoing_notification.dart';
 import 'export_path.dart';
 import 'export_rename.dart';
 import 'disable_recommend_content.dart';
+import 'hide_announcement.dart';
 import 'ignore_upgrade_pop.dart';
 import 'ignore_view_log.dart';
 import 'is_pro.dart';
@@ -103,5 +105,7 @@ Future initConfigs(BuildContext context) async {
   await initAppOrientation();
   await initIgnoreVewLog();
   await initIgnoreUpgradePop();
+  await initHideAnnouncement();
   if (normalPlatform) autoCheckNewVersion();
+  methods.referralCall('{"action":"status"}').catchError((_) => "");
 }

@@ -589,6 +589,10 @@ class Methods {
     return _invoke("input_cd_key", cdKey);
   }
 
+  Future<String> referralCall(String payload) {
+    return _invoke("referral_call", payload);
+  }
+
   Future checkPat(String accessKey) {
     return _invoke("check_pat", accessKey);
   }

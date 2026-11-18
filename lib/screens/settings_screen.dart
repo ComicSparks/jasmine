@@ -33,6 +33,7 @@ import '../configs/download_ongoing_notification.dart';
 import '../configs/esc_to_pop.dart';
 import '../configs/disable_recommend_content.dart';
 import '../configs/export_rename.dart';
+import '../configs/hide_announcement.dart';
 import '../configs/ignore_upgrade_pop.dart';
 import '../configs/ignore_view_log.dart';
 import '../configs/is_pro.dart';
@@ -345,6 +346,7 @@ class _SettingsState extends State<SettingsScreen> {
                 if (isPro) ...[
                   autoUpdateCheckSetting(),
                   ignoreUpgradePopSetting(),
+                  hideAnnouncementSetting(),
                   const Divider(),
                 ],
                 ignoreVewLogSetting(),

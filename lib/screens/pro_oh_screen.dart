@@ -81,6 +81,7 @@ class _ProScreenState extends State<ProOhScreen> {
           const Divider(),
           const ProServerNameWidget(),
           const Divider(),
+          const ReferralTiles(),
         ],
       ),
     );
