@@ -13,7 +13,7 @@ import 'package:jasmine/screens/components/types.dart';
 import '../../configs/is_pro.dart';
 import 'comic_list.dart';
 
-const _noProMax = 10;
+const _noProMax = 5;
 
 class ComicPager extends StatefulWidget {
   final Future<InnerComicPage> Function(int page) onPage;

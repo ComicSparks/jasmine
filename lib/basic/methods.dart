@@ -11,6 +11,78 @@ export 'entities.dart';
 
 const methods = Methods._();
 
+class HostOptions {
+  final List<String> official;
+  final List<String> custom;
+
+  const HostOptions({
+    required this.official,
+    required this.custom,
+  });
+
+  factory HostOptions.fromJson(Map<String, dynamic> json) {
+    return HostOptions(
+      official: _hostStrings(json["official"]),
+      custom: _hostStrings(json["custom"]),
+    );
+  }
+
+  List<String> get visible {
+    final seen = <String>{};
+    final hosts = <String>[];
+    for (final host in [...official, ...custom]) {
+      if (seen.add(host)) {
+        hosts.add(host);
+      }
+    }
+    return hosts;
+  }
+
+  bool isCustom(String host) => custom.contains(host);
+}
+
+List<String> _hostStrings(dynamic value) {
+  if (value is! List) {
+    return [];
+  }
+  return value.map((item) => "$item").where((item) => item.isNotEmpty).toList();
+}
+
+class UpdateShuntsResult {
+  final bool apiOk;
+  final bool cdnOk;
+  final String apiError;
+  final String cdnError;
+  final String apiHost;
+  final String cdnHost;
+
+  const UpdateShuntsResult({
+    required this.apiOk,
+    required this.cdnOk,
+    required this.apiError,
+    required this.cdnError,
+    required this.apiHost,
+    required this.cdnHost,
+  });
+
+  factory UpdateShuntsResult.fromJson(Map<String, dynamic> json) {
+    return UpdateShuntsResult(
+      apiOk: json["api_ok"] == true,
+      cdnOk: json["cdn_ok"] == true,
+      apiError: "${json["api_error"] ?? ""}",
+      cdnError: "${json["cdn_error"] ?? ""}",
+      apiHost: "${json["api_host"] ?? ""}",
+      cdnHost: "${json["cdn_host"] ?? ""}",
+    );
+  }
+
+  String get message {
+    final api = apiOk ? "API 分流已更新" : "API 分流更新失败：$apiError";
+    final cdn = cdnOk ? "图片分流已更新" : "图片分流更新失败：$cdnError";
+    return "$api\n$cdn";
+  }
+}
+
 class Methods {
   const Methods._();
 
@@ -301,6 +373,40 @@ class Methods {
 
   Future saveCdnHost(String choose) {
     return _invoke("save_cdn_host", choose);
+  }
+
+  Future<HostOptions> loadApiHostOptions() async {
+    return HostOptions.fromJson(
+      Map<String, dynamic>.from(jsonDecode(await _invoke("load_api_host_options", ""))),
+    );
+  }
+
+  Future<HostOptions> loadCdnHostOptions() async {
+    return HostOptions.fromJson(
+      Map<String, dynamic>.from(jsonDecode(await _invoke("load_cdn_host_options", ""))),
+    );
+  }
+
+  Future<String> addApiHostCustom(String host) {
+    return _invoke("add_api_host_custom", host);
+  }
+
+  Future removeApiHostCustom(String host) {
+    return _invoke("remove_api_host_custom", host);
+  }
+
+  Future<String> addCdnHostCustom(String host) {
+    return _invoke("add_cdn_host_custom", host);
+  }
+
+  Future removeCdnHostCustom(String host) {
+    return _invoke("remove_cdn_host_custom", host);
+  }
+
+  Future<UpdateShuntsResult> updateShunts() async {
+    return UpdateShuntsResult.fromJson(
+      Map<String, dynamic>.from(jsonDecode(await _invoke("update_shunts", ""))),
+    );
   }
 
   Future<PreLoginResponse> preLogin() async {
