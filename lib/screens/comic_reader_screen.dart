@@ -18,11 +18,13 @@ import 'package:jasmine/configs/reader_direction.dart';
 import 'package:jasmine/configs/reader_slider_position.dart';
 import 'package:jasmine/configs/reader_type.dart';
 import 'package:jasmine/configs/reader_side_inset.dart';
+import 'package:jasmine/configs/reader_wheel.dart';
 import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/configs/two_page_direction.dart';
 import 'package:jasmine/screens/components/content_error.dart';
 import 'package:jasmine/screens/components/content_loading.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:zoomable_positioned_list/zoomable_positioned_list.dart'
@@ -32,6 +34,7 @@ import '../configs/ignore_view_log.dart';
 import '../configs/no_animation.dart';
 import '../configs/volume_key_control.dart';
 import 'components/images.dart';
+import 'components/reader_wheel.dart';
 import 'components/right_click_pop.dart';
 
 class ComicReaderScreen extends StatefulWidget {
@@ -909,6 +912,63 @@ abstract class _ComicReaderState extends State<_ComicReader> {
     }
     widget.onChangeEp(nextId, _fullScreen);
   }
+
+  double _wheelViewport() {
+    final size = MediaQuery.sizeOf(context);
+    if (widget.readerDirection == ReaderDirection.topToBottom) {
+      return size.height;
+    }
+    return size.width;
+  }
+
+  ReaderWheel _newListWheel({
+    required zoomable.ItemScrollController itemScrollController,
+    required zoomable.ScrollOffsetController scrollOffsetController,
+    required int lastIndex,
+  }) {
+    return ReaderWheel(
+      turnPage: (direction) {
+        if (!itemScrollController.isAttached) return Future.value();
+        final index = (_current + direction).clamp(0, lastIndex);
+        if (index == _current) return Future.value();
+        if (readerWheelNoAnimation()) {
+          itemScrollController.jumpTo(index: index);
+          return Future.value();
+        }
+        return itemScrollController.scrollTo(
+          index: index,
+          duration: const Duration(milliseconds: 400),
+        );
+      },
+      readOffset: () => scrollOffsetController.pixels,
+      jumpOffset: scrollOffsetController.jumpTo,
+      viewport: _wheelViewport,
+      limits: () {
+        if (!scrollOffsetController.hasClients) return null;
+        final min = scrollOffsetController.minScrollExtent;
+        if (min == null) return null;
+        return ReaderWheelRange(min, scrollOffsetController.maxScrollExtent);
+      },
+      pageMode: () => readerWheelMode == ReaderWheelMode.page,
+      eventsPerPage: () => readerWheelEventsPerPage,
+      stepFraction: () => readerWheelStepFraction,
+      noAnimation: readerWheelNoAnimation,
+    );
+  }
+
+  ReaderWheel _newPageWheel(Future<void> Function(int direction) turnPage) {
+    return ReaderWheel(
+      turnPage: turnPage,
+      readOffset: () => null,
+      jumpOffset: (_) {},
+      viewport: () => 0,
+      limits: () => null,
+      pageMode: () => true,
+      eventsPerPage: () => readerWheelEventsPerPage,
+      stepFraction: () => readerWheelStepFraction,
+      noAnimation: readerWheelNoAnimation,
+    );
+  }
 }
 
 class _EpChooser extends StatefulWidget {
@@ -1061,6 +1121,8 @@ class _ComicReaderWebToonState extends _ComicReaderState {
   late final List<Size?> _trueSizes = [];
   late final zoomable.ItemScrollController _itemScrollController;
   late final zoomable.ItemPositionsListener _itemPositionsListener;
+  late final zoomable.ScrollOffsetController _scrollOffsetController;
+  late final ReaderWheel _wheel;
 
   @override
   void initState() {
@@ -1068,13 +1130,20 @@ class _ComicReaderWebToonState extends _ComicReaderState {
       _trueSizes.add(null);
     }
     _itemScrollController = zoomable.ItemScrollController();
+    _scrollOffsetController = zoomable.ScrollOffsetController();
     _itemPositionsListener = zoomable.ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onListCurrentChange);
+    _wheel = _newListWheel(
+      itemScrollController: _itemScrollController,
+      scrollOffsetController: _scrollOffsetController,
+      lastIndex: widget.chapter.images.length - 1,
+    );
     super.initState();
   }
 
   @override
   void dispose() {
+    _wheel.dispose();
     _itemPositionsListener.itemPositions.removeListener(_onListCurrentChange);
     super.dispose();
   }
@@ -1199,6 +1268,8 @@ class _ComicReaderWebToonState extends _ComicReaderState {
         }
         return zoomable.ZoomablePositionedList.builder(
           enableZoom: false,
+          onPointerScroll: _wheel.onScroll,
+          scrollOffsetController: _scrollOffsetController,
           initialScrollIndex: widget.startIndex,
           scrollDirection: widget.readerDirection == ReaderDirection.topToBottom
               ? Axis.vertical
@@ -1260,12 +1331,40 @@ class _ComicReaderWebToonState extends _ComicReaderState {
 class _ComicReaderGalleryState extends _ComicReaderState {
   late PageController _pageController;
   final Map<int, int> _reloadKeys = {}; // 跟踪每个页面的重新加载次数
+  late final ReaderWheel _wheel;
+  PhotoViewScaleState _wheelScale = PhotoViewScaleState.initial;
+
+  bool get _wheelPageEnabled =>
+      _wheelScale == PhotoViewScaleState.initial ||
+      _wheelScale == PhotoViewScaleState.zoomedOut;
 
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.startIndex);
+    _wheel = _newPageWheel(_wheelTurn);
     super.initState();
     _preloadJump(widget.startIndex, init: true);
+  }
+
+  Future<void> _wheelTurn(int direction) {
+    if (!_pageController.hasClients) return Future.value();
+    final current = _pageController.page?.round() ?? _current;
+    final last = widget.chapter.images.length - 1;
+    if (last < 0) return Future.value();
+    final index = (current + direction).clamp(0, last);
+    if (index == current) return Future.value();
+    if (readerWheelNoAnimation()) {
+      _pageController.jumpToPage(index);
+      _preloadJump(index);
+      return Future.value();
+    }
+    return _pageController
+        .animateToPage(
+          index,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.ease,
+        )
+        .then((_) => _preloadJump(index));
   }
 
   void _reloadImage(int index) async {
@@ -1302,6 +1401,7 @@ class _ComicReaderGalleryState extends _ComicReaderState {
       ),
       pageController: _pageController,
       onPageChanged: _onGalleryPageChange,
+      scaleStateChangedCallback: (state) => _wheelScale = state,
       itemCount: widget.chapter.images.length,
       allowImplicitScrolling: true,
       builder: (BuildContext context, int index) {
@@ -1314,7 +1414,10 @@ class _ComicReaderGalleryState extends _ComicReaderState {
               currentReaderControllerType == ReaderControllerType.touchDouble ||
                   currentReaderControllerType ==
                       ReaderControllerType.touchDoubleOnceNext,
-          child: LayoutBuilder(
+          child: readerMouseWheel(
+            enabled: () => _wheelPageEnabled,
+            onScroll: _wheel.onScroll,
+            child: LayoutBuilder(
             key: ValueKey(
                 'page_${widget.chapter.id}_${widget.chapter.images[index]}_$reloadKey'),
             builder: (BuildContext context, BoxConstraints constraints) {
@@ -1353,6 +1456,7 @@ class _ComicReaderGalleryState extends _ComicReaderState {
               );
             },
           ),
+          ),
         );
       },
     );
@@ -1360,6 +1464,7 @@ class _ComicReaderGalleryState extends _ComicReaderState {
 
   @override
   void dispose() {
+    _wheel.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -1468,6 +1573,8 @@ class _ListViewReaderState extends _ComicReaderState {
   final List<Size?> _trueSizes = [];
   late final zoomable.ItemScrollController _itemScrollController;
   late final zoomable.ItemPositionsListener _itemPositionsListener;
+  late final zoomable.ScrollOffsetController _scrollOffsetController;
+  late final ReaderWheel _wheel;
 
   @override
   void initState() {
@@ -1475,13 +1582,20 @@ class _ListViewReaderState extends _ComicReaderState {
       _trueSizes.add(null);
     }
     _itemScrollController = zoomable.ItemScrollController();
+    _scrollOffsetController = zoomable.ScrollOffsetController();
     _itemPositionsListener = zoomable.ItemPositionsListener.create();
     _itemPositionsListener.itemPositions.addListener(_onListCurrentChange);
+    _wheel = _newListWheel(
+      itemScrollController: _itemScrollController,
+      scrollOffsetController: _scrollOffsetController,
+      lastIndex: widget.chapter.images.length - 1,
+    );
     super.initState();
   }
 
   @override
   void dispose() {
+    _wheel.dispose();
     _itemPositionsListener.itemPositions.removeListener(_onListCurrentChange);
     super.dispose();
   }
@@ -1603,6 +1717,8 @@ class _ListViewReaderState extends _ComicReaderState {
           );
         }
         return zoomable.ZoomablePositionedList.builder(
+          onPointerScroll: _wheel.onScroll,
+          scrollOffsetController: _scrollOffsetController,
           gestureSpeed: currentGestureSpeed(),
           dragRegionLock: currentDragRegionLock(),
           minScale: readerZoomMinScale,
@@ -1679,6 +1795,12 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
   List<PhotoViewGalleryPageOptions> options = [];
   late PhotoViewGallery _view;
   final Map<int, int> _imageProviderKeys = {};
+  late final ReaderWheel _wheel;
+  PhotoViewScaleState _wheelScale = PhotoViewScaleState.initial;
+
+  bool get _wheelPageEnabled =>
+      _wheelScale == PhotoViewScaleState.initial ||
+      _wheelScale == PhotoViewScaleState.zoomedOut;
 
   @override
   void initState() {
@@ -1688,6 +1810,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
     }
     super.initState();
     _pageController = PageController(initialPage: widget.startIndex ~/ 2);
+    _wheel = _newPageWheel(_wheelTurn);
     for (var index = 0; index < widget.chapter.images.length; index++) {
       _imageProviderKeys[index] = 0;
       ips.add(PageImageProvider(
@@ -1709,6 +1832,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
           : Axis.horizontal,
       reverse: widget.readerDirection == ReaderDirection.rightToLeft,
       onPageChanged: _onGalleryPageChange,
+      scaleStateChangedCallback: (state) => _wheelScale = state,
       backgroundDecoration: BoxDecoration(color: Colors.black),
     );
   }
@@ -1747,7 +1871,10 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
               currentReaderControllerType == ReaderControllerType.touchDouble ||
                   currentReaderControllerType ==
                       ReaderControllerType.touchDoubleOnceNext,
-          child: LayoutBuilder(
+          child: readerMouseWheel(
+            enabled: () => _wheelPageEnabled,
+            onScroll: _wheel.onScroll,
+            child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               return Padding(
                 padding: readerSidePaddingOf(
@@ -1829,6 +1956,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
               );
             },
           ),
+          ),
         ),
       );
     }
@@ -1858,8 +1986,27 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
 
   @override
   void dispose() {
+    _wheel.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _wheelTurn(int direction) {
+    if (!_pageController.hasClients) return Future.value();
+    final current = _pageController.page?.round() ?? (_current ~/ 2);
+    final last = (widget.chapter.images.length + 1) ~/ 2 - 1;
+    if (last < 0) return Future.value();
+    final index = (current + direction).clamp(0, last);
+    if (index == current) return Future.value();
+    if (readerWheelNoAnimation()) {
+      _pageController.jumpToPage(index);
+      return Future.value();
+    }
+    return _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.ease,
+    );
   }
 
   @override

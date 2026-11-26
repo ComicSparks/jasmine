@@ -26,7 +26,8 @@ dependencies:
   file_picker: ^10.3.10
   image_picker: ^1.2.0
   permission_handler: ^12.0.1
-  zoomable_positioned_list: ^1.1.0
+  zoomable_positioned_list:
+    path: ../zoomable_positioned_list
   flutter_inappwebview: ^6.1.5
   url_launcher: ^6.3.2
   ffi: ^2.1.0
