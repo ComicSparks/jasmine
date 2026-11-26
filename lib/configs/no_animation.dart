@@ -17,13 +17,16 @@ bool currentNoAnimation() {
   return _noAnimation;
 }
 
+Future<void> setNoAnimation(bool value) async {
+  _noAnimation = value;
+  await methods.saveProperty(_propertyName, "$value");
+}
+
 Future<void> _chooseNoAnimation(BuildContext context) async {
   String? result = await chooseListDialog<String>(context,
       title: "取消键盘或音量翻页动画", values: ["是", "否"]);
   if (result != null) {
-    var target = result == "是";
-    await methods.saveProperty(_propertyName, "$target");
-    _noAnimation = target;
+    await setNoAnimation(result == "是");
   }
 }
 

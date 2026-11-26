@@ -13,6 +13,67 @@ double get readerZoomMinScale => _readerZoomMinScale;
 double get readerZoomMaxScale => _readerZoomMaxScale;
 double get readerZoomDoubleTapScale => _readerZoomDoubleTapScale;
 
+Future<void> setReaderZoomMinScale(double value) async {
+  _readerZoomMinScale =
+      ((value * 10).roundToDouble() / 10.0).clamp(0.2, 1.0).toDouble();
+  if (_readerZoomMaxScale < _readerZoomMinScale) {
+    _readerZoomMaxScale = _readerZoomMinScale;
+    await methods.saveProperty(
+      _readerZoomMaxPropertyName,
+      "$_readerZoomMaxScale",
+    );
+  }
+  if (_readerZoomDoubleTapScale > _readerZoomMaxScale) {
+    _readerZoomDoubleTapScale = _readerZoomMaxScale;
+    await methods.saveProperty(
+      _readerZoomDoubleTapPropertyName,
+      "$_readerZoomDoubleTapScale",
+    );
+  }
+  await methods.saveProperty(
+    _readerZoomMinPropertyName,
+    "$_readerZoomMinScale",
+  );
+}
+
+Future<void> setReaderZoomMaxScale(double value) async {
+  _readerZoomMaxScale =
+      ((value * 10).roundToDouble() / 10.0).clamp(1.0, 30.0).toDouble();
+  if (_readerZoomMaxScale < _readerZoomMinScale) {
+    _readerZoomMinScale = _readerZoomMaxScale;
+    await methods.saveProperty(
+      _readerZoomMinPropertyName,
+      "$_readerZoomMinScale",
+    );
+  }
+  if (_readerZoomDoubleTapScale > _readerZoomMaxScale) {
+    _readerZoomDoubleTapScale = _readerZoomMaxScale;
+    await methods.saveProperty(
+      _readerZoomDoubleTapPropertyName,
+      "$_readerZoomDoubleTapScale",
+    );
+  }
+  await methods.saveProperty(
+    _readerZoomMaxPropertyName,
+    "$_readerZoomMaxScale",
+  );
+}
+
+Future<void> setReaderZoomDoubleTapScale(double value) async {
+  _readerZoomDoubleTapScale =
+      ((value * 10).roundToDouble() / 10.0).clamp(1.2, 5.0).toDouble();
+  if (_readerZoomDoubleTapScale > _readerZoomMaxScale) {
+    _readerZoomDoubleTapScale = _readerZoomMaxScale;
+  }
+  if (_readerZoomDoubleTapScale < _readerZoomMinScale) {
+    _readerZoomDoubleTapScale = _readerZoomMinScale;
+  }
+  await methods.saveProperty(
+    _readerZoomDoubleTapPropertyName,
+    "$_readerZoomDoubleTapScale",
+  );
+}
+
 Future<void> initReaderZoomScale() async {
   _readerZoomMinScale = double.tryParse(
         await methods.loadProperty(_readerZoomMinPropertyName),
@@ -50,17 +111,8 @@ Widget readerZoomMinScaleSetting() {
           divisions: 8,
           label: "${_readerZoomMinScale.toStringAsFixed(1)}x",
           onChanged: (newValue) async {
-            final value = (newValue * 10).roundToDouble() / 10.0;
-            await methods.saveProperty(_readerZoomMinPropertyName, "$value");
-            setState(() {
-              _readerZoomMinScale = value;
-              if (_readerZoomMaxScale < _readerZoomMinScale) {
-                _readerZoomMaxScale = _readerZoomMinScale;
-              }
-              if (_readerZoomDoubleTapScale > _readerZoomMaxScale) {
-                _readerZoomDoubleTapScale = _readerZoomMaxScale;
-              }
-            });
+            await setReaderZoomMinScale(newValue);
+            setState(() {});
           },
         ),
         trailing: Text(
@@ -84,17 +136,8 @@ Widget readerZoomMaxScaleSetting() {
           divisions: 58,
           label: "${_readerZoomMaxScale.toStringAsFixed(1)}x",
           onChanged: (newValue) async {
-            final value = (newValue * 10).roundToDouble() / 10.0;
-            await methods.saveProperty(_readerZoomMaxPropertyName, "$value");
-            setState(() {
-              _readerZoomMaxScale = value;
-              if (_readerZoomMaxScale < _readerZoomMinScale) {
-                _readerZoomMinScale = _readerZoomMaxScale;
-              }
-              if (_readerZoomDoubleTapScale > _readerZoomMaxScale) {
-                _readerZoomDoubleTapScale = _readerZoomMaxScale;
-              }
-            });
+            await setReaderZoomMaxScale(newValue);
+            setState(() {});
           },
         ),
         trailing: Text(
@@ -119,18 +162,8 @@ Widget readerZoomDoubleTapScaleSetting() {
           divisions: 38,
           label: "${_readerZoomDoubleTapScale.toStringAsFixed(1)}x",
           onChanged: (newValue) async {
-            final value = (newValue * 10).roundToDouble() / 10.0;
-            await methods.saveProperty(
-                _readerZoomDoubleTapPropertyName, "$value");
-            setState(() {
-              _readerZoomDoubleTapScale = value;
-              if (_readerZoomDoubleTapScale > _readerZoomMaxScale) {
-                _readerZoomDoubleTapScale = _readerZoomMaxScale;
-              }
-              if (_readerZoomDoubleTapScale < _readerZoomMinScale) {
-                _readerZoomDoubleTapScale = _readerZoomMinScale;
-              }
-            });
+            await setReaderZoomDoubleTapScale(newValue);
+            setState(() {});
           },
         ),
         trailing: Text(

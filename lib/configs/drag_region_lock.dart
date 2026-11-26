@@ -17,16 +17,19 @@ Future<void> initDragRegionLock() async {
 
 bool currentDragRegionLock() => _dragRegionLock;
 
+Future<void> setDragRegionLock(bool value) async {
+  _dragRegionLock = value;
+  await methods.saveProperty(_propertyName, "$value");
+}
+
 Widget dragRegionLockSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
       return SwitchListTile(
         value: _dragRegionLock,
         onChanged: (value) async {
-          await methods.saveProperty(_propertyName, "$value");
-          setState(() {
-            _dragRegionLock = value;
-          });
+          await setDragRegionLock(value);
+          setState(() {});
         },
         title: const Text("拖拽区域锁定"),
         subtitle: const Text("避免缩放时误触滚动"),

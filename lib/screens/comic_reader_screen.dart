@@ -849,22 +849,25 @@ abstract class _ComicReaderState extends State<_ComicReader> {
 
   //
   _onMoreSetting() async {
+    final openedDirection = currentReaderDirection;
+    final openedType = currentReaderType;
     await showMaterialModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xAA000000),
       builder: (context) {
         return SizedBox(
-          height: MediaQuery.of(context).size.height / 2,
+          height: MediaQuery.of(context).size.height * .45,
           child: _SettingPanel(),
         );
       },
     );
-    if (widget.readerDirection != currentReaderDirection ||
-        widget.readerType != currentReaderType) {
+    if (!mounted) return;
+    if (openedDirection != currentReaderDirection ||
+        openedType != currentReaderType) {
       widget.reload(_current, _fullScreen);
-    } else {
-      setState(() {});
+      return;
     }
+    setState(() {});
   }
 
   //
@@ -1036,81 +1039,297 @@ class _SettingPanel extends StatefulWidget {
 class _SettingPanelState extends State<_SettingPanel> {
   @override
   Widget build(BuildContext context) {
+    final insetMax =
+        readerSideInsetMode == ReaderSideInsetMode.percent ? 30.0 : 160.0;
+    final insetDivisions =
+        readerSideInsetMode == ReaderSideInsetMode.percent ? 30 : 160;
     return ListView(
+      padding: const EdgeInsets.all(15),
       children: [
-        Row(
-          children: [
-            _bottomIcon(
-              icon: Icons.crop_sharp,
-              title: readerDirectionName(currentReaderDirection, context),
-              onPressed: () async {
-                await chooseReaderDirection(context);
-                setState(() {});
-              },
-            ),
-            _bottomIcon(
-              icon: Icons.view_day_outlined,
-              title: readerTypeName(currentReaderType, context),
-              onPressed: () async {
-                await chooseReaderType(context);
-                setState(() {});
-              },
-            ),
-            _bottomIcon(
-              icon: Icons.control_camera_outlined,
-              title: currentReaderControllerTypeName(),
-              onPressed: () async {
-                await chooseReaderControllerType(context);
-                setState(() {});
-              },
-            ),
-            _bottomIcon(
-              icon: Icons.straighten_sharp,
-              title: currentReaderSliderPositionName,
-              onPressed: () async {
-                await chooseReaderSliderPosition(context);
-                setState(() {});
-              },
-            ),
-          ],
+        _chooseTile(
+          icon: Icons.crop_sharp,
+          title: "阅读方向",
+          value: readerDirectionName(currentReaderDirection, context),
+          onTap: () async {
+            await chooseReaderDirection(context);
+            setState(() {});
+          },
+        ),
+        _chooseTile(
+          icon: Icons.view_day_outlined,
+          title: "阅读模式",
+          value: readerTypeName(currentReaderType, context),
+          onTap: () async {
+            await chooseReaderType(context);
+            setState(() {});
+          },
+        ),
+        _chooseTile(
+          icon: Icons.control_camera_outlined,
+          title: "控制器",
+          value: currentReaderControllerTypeName(),
+          onTap: () async {
+            await chooseReaderControllerType(context);
+            setState(() {});
+          },
+        ),
+        _chooseTile(
+          icon: Icons.straighten_sharp,
+          title: "进度条位置",
+          value: currentReaderSliderPositionName,
+          onTap: () async {
+            await chooseReaderSliderPosition(context);
+            setState(() {});
+          },
+        ),
+        if (currentReaderType == ReaderType.twoPageGallery)
+          _chooseTile(
+            icon: Icons.chrome_reader_mode,
+            title: "双页阅读器方向",
+            value: twoPageDirectionName(currentTwoPageDirection, context),
+            onTap: () async {
+              await chooseTwoPageDirection(context);
+              setState(() {});
+            },
+          ),
+        const Divider(color: Colors.white24),
+        _chooseTile(
+          icon: Icons.mouse,
+          title: "滚轮翻页方式",
+          value: readerWheelModeName(),
+          onTap: () async {
+            await chooseReaderWheelMode(context);
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.unfold_more,
+          title: "滚轮翻一页所需次数",
+          valueLabel: "$readerWheelEventsPerPage",
+          min: 1,
+          max: 4,
+          divisions: 3,
+          value: readerWheelEventsPerPage.toDouble(),
+          onChanged: (v) async {
+            await setReaderWheelEventsPerPage(v.round());
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.swap_vert,
+          title: "滚轮每次滚动距离",
+          valueLabel: "$readerWheelStepPercent%",
+          min: 10,
+          max: 100,
+          divisions: 90,
+          value: readerWheelStepPercent.toDouble(),
+          onChanged: (v) async {
+            await setReaderWheelStepPercent(v.round());
+            setState(() {});
+          },
+        ),
+        _switchTile(
+          icon: Icons.animation,
+          title: "取消滚轮翻页动画",
+          value: readerWheelNoAnimation(),
+          onChanged: (v) async {
+            await setReaderWheelNoAnimation(v);
+            setState(() {});
+          },
+        ),
+        const Divider(color: Colors.white24),
+        _chooseTile(
+          icon: Icons.space_bar,
+          title: "两侧留白方式",
+          value: readerSideInsetModeName(),
+          onTap: () async {
+            await chooseReaderSideInsetMode(context);
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.stay_current_portrait,
+          title: "竖屏留白",
+          valueLabel: readerSideInsetValueLabel(readerSideInsetPortrait),
+          min: 0,
+          max: insetMax,
+          divisions: insetDivisions,
+          value: readerSideInsetPortrait.clamp(0, insetMax).toDouble(),
+          onChanged: (v) async {
+            await setReaderSideInsetPortrait(v.roundToDouble());
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.stay_current_landscape,
+          title: "横屏留白",
+          valueLabel: readerSideInsetValueLabel(readerSideInsetLandscape),
+          min: 0,
+          max: insetMax,
+          divisions: insetDivisions,
+          value: readerSideInsetLandscape.clamp(0, insetMax).toDouble(),
+          onChanged: (v) async {
+            await setReaderSideInsetLandscape(v.roundToDouble());
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.zoom_out_map,
+          title: "缩小最小倍数",
+          valueLabel: "${readerZoomMinScale.toStringAsFixed(1)}x",
+          min: 0.2,
+          max: 1.0,
+          divisions: 8,
+          value: readerZoomMinScale.clamp(0.2, 1.0).toDouble(),
+          onChanged: (v) async {
+            await setReaderZoomMinScale(v);
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.zoom_in,
+          title: "放大最大倍数",
+          valueLabel: "${readerZoomMaxScale.toStringAsFixed(1)}x",
+          min: 1.0,
+          max: 30.0,
+          divisions: 58,
+          value: readerZoomMaxScale.clamp(1.0, 30.0).toDouble(),
+          onChanged: (v) async {
+            await setReaderZoomMaxScale(v);
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.touch_app,
+          title: "双击放大倍数",
+          valueLabel: "${readerZoomDoubleTapScale.toStringAsFixed(1)}x",
+          min: 1.2,
+          max: 5.0,
+          divisions: 38,
+          value: readerZoomDoubleTapScale.clamp(1.2, 5.0).toDouble(),
+          onChanged: (v) async {
+            await setReaderZoomDoubleTapScale(v);
+            setState(() {});
+          },
+        ),
+        _switchTile(
+          icon: Icons.border_inner,
+          title: "拖拽区域锁定",
+          value: currentDragRegionLock(),
+          onChanged: (v) async {
+            await setDragRegionLock(v);
+            setState(() {});
+          },
+        ),
+        _sliderTile(
+          icon: Icons.speed,
+          title: "手势速度",
+          valueLabel: "${currentGestureSpeed().toStringAsFixed(1)}x",
+          min: 0.2,
+          max: 3.0,
+          divisions: 28,
+          value: currentGestureSpeed().clamp(0.2, 3.0).toDouble(),
+          onChanged: (v) async {
+            await setGestureSpeed(v);
+            setState(() {});
+          },
+        ),
+        const Divider(color: Colors.white24),
+        _switchTile(
+          icon: Icons.access_time_filled_outlined,
+          title: "取消键盘或音量翻页动画",
+          value: currentNoAnimation(),
+          onChanged: (v) async {
+            await setNoAnimation(v);
+            setState(() {});
+          },
         ),
       ],
     );
   }
 
-  Widget _bottomIcon({
+  Widget _chooseTile({
     required IconData icon,
     required String title,
-    required void Function() onPressed,
+    required String value,
+    required FutureOr<void> Function() onTap,
   }) {
-    return Expanded(
-      child: Center(
-        child: Column(
-          children: [
-            IconButton(
-              iconSize: 55,
-              icon: Column(
-                children: [
-                  Container(height: 3),
-                  Icon(
-                    icon,
-                    size: 25,
-                    color: Colors.white,
-                  ),
-                  Container(height: 3),
-                  Text(
-                    title,
-                    style: const TextStyle(color: Colors.white, fontSize: 10),
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                  ),
-                  Container(height: 3),
-                ],
-              ),
-              onPressed: onPressed,
-            )
-          ],
-        ),
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 100),
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.chevron_right, color: Colors.white70),
+        ],
+      ),
+      onTap: () async => await onTap(),
+    );
+  }
+
+  Widget _switchTile({
+    required IconData icon,
+    required String title,
+    required bool value,
+    required FutureOr<void> Function(bool) onChanged,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      trailing: Switch(
+        value: value,
+        onChanged: (v) async => await onChanged(v),
+        activeThumbColor: Theme.of(context).colorScheme.secondary,
+      ),
+    );
+  }
+
+  Widget _sliderTile({
+    required IconData icon,
+    required String title,
+    required String valueLabel,
+    required double min,
+    required double max,
+    required int divisions,
+    required double value,
+    required FutureOr<void> Function(double) onChanged,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      subtitle: Row(
+        children: [
+          Expanded(
+            child: Slider(
+              min: min,
+              max: max,
+              divisions: divisions,
+              value: value,
+              onChanged: (v) async => await onChanged(v),
+            ),
+          ),
+          SizedBox(
+            width: 72,
+            child: Text(
+              valueLabel,
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -2041,8 +2260,16 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
     }
   }
 
+  int? _pageOptionsStamp;
+
   @override
   Widget _buildViewer() {
+    final stamp =
+        Object.hash(currentReaderControllerType, currentTwoPageDirection);
+    if (_pageOptionsStamp != stamp) {
+      _pageOptionsStamp = stamp;
+      _buildOptions();
+    }
     _buildView();
     return Stack(
       children: [

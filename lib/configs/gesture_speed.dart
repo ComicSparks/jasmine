@@ -14,6 +14,12 @@ Future<void> initGestureSpeed() async {
 
 double currentGestureSpeed() => _gestureSpeed;
 
+Future<void> setGestureSpeed(double value) async {
+  _gestureSpeed =
+      ((value * 10).roundToDouble() / 10.0).clamp(0.2, 3.0).toDouble();
+  await methods.saveProperty(_propertyName, _gestureSpeed.toString());
+}
+
 Widget gestureSpeedSetting() {
   return StatefulBuilder(
     builder: (BuildContext context, void Function(void Function()) setState) {
@@ -26,11 +32,8 @@ Widget gestureSpeedSetting() {
           divisions: 28,
           label: "${_gestureSpeed.toStringAsFixed(1)}x",
           onChanged: (v) async {
-            final value = (v * 10).roundToDouble() / 10.0;
-            await methods.saveProperty(_propertyName, value.toString());
-            setState(() {
-              _gestureSpeed = value;
-            });
+            await setGestureSpeed(v);
+            setState(() {});
           },
         ),
         trailing: Text(
