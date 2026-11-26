@@ -17,6 +17,7 @@ import 'package:jasmine/configs/gesture_speed.dart';
 import 'package:jasmine/configs/reader_direction.dart';
 import 'package:jasmine/configs/reader_slider_position.dart';
 import 'package:jasmine/configs/reader_type.dart';
+import 'package:jasmine/configs/reader_side_inset.dart';
 import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/configs/two_page_direction.dart';
 import 'package:jasmine/screens/components/content_error.dart';
@@ -347,7 +348,12 @@ abstract class _ComicReaderState extends State<_ComicReader> {
       addVolumeListen();
     }
     _rebuildSeriesCache();
+    readerSideInsetListenable.addListener(_onSideInsetChanged);
     super.initState();
+  }
+
+  void _onSideInsetChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -360,6 +366,7 @@ abstract class _ComicReaderState extends State<_ComicReader> {
 
   @override
   void dispose() {
+    readerSideInsetListenable.removeListener(_onSideInsetChanged);
     _readerControllerEvent.unsubscribe(_onPageControl);
     if (currentVolumeKeyControl()) {
       delVolumeListen();
@@ -1127,9 +1134,13 @@ class _ComicReaderWebToonState extends _ComicReaderState {
           late Size renderSize;
           if (_trueSizes[index] != null) {
             if (widget.readerDirection == ReaderDirection.topToBottom) {
+              final contentWidth = readerSideFrame(
+                verticalReader: true,
+                viewport: Size(constraints.maxWidth, constraints.maxHeight),
+              ).fit(constraints.maxWidth);
               renderSize = Size(
-                constraints.maxWidth,
-                constraints.maxWidth *
+                contentWidth,
+                contentWidth *
                     _trueSizes[index]!.height /
                     _trueSizes[index]!.width,
               );
@@ -1138,6 +1149,10 @@ class _ComicReaderWebToonState extends _ComicReaderState {
                   super._appBarHeight() -
                   super._bottomBarHeight() -
                   MediaQuery.of(context).padding.bottom;
+              maxHeight = readerSideFrame(
+                verticalReader: false,
+                viewport: Size(constraints.maxWidth, constraints.maxHeight),
+              ).fit(maxHeight);
               renderSize = Size(
                 maxHeight *
                     _trueSizes[index]!.width /
@@ -1147,12 +1162,22 @@ class _ComicReaderWebToonState extends _ComicReaderState {
             }
           } else {
             if (widget.readerDirection == ReaderDirection.topToBottom) {
-              renderSize = Size(constraints.maxWidth, constraints.maxWidth / 2);
+              final contentWidth = readerSideFrame(
+                verticalReader: true,
+                viewport: Size(constraints.maxWidth, constraints.maxHeight),
+              ).fit(constraints.maxWidth);
+              renderSize = Size(contentWidth, contentWidth / 2);
             } else {
               // ReaderDirection.LEFT_TO_RIGHT
               // ReaderDirection.RIGHT_TO_LEFT
               renderSize =
-                  Size(constraints.maxWidth / 2, constraints.maxHeight);
+                  Size(
+                constraints.maxWidth / 2,
+                readerSideFrame(
+                  verticalReader: false,
+                  viewport: Size(constraints.maxWidth, constraints.maxHeight),
+                ).fit(constraints.maxHeight),
+              );
             }
           }
           var currentIndex = index;
@@ -1196,7 +1221,11 @@ class _ComicReaderWebToonState extends _ComicReaderState {
             if (widget.chapter.images.length == index) {
               return _buildNextEp();
             }
-            return _images[index];
+            return readerSideFrame(
+              verticalReader:
+                  widget.readerDirection == ReaderDirection.topToBottom,
+              viewport: Size(constraints.maxWidth, constraints.maxHeight),
+            ).place(_images[index]);
           },
         );
       },
@@ -1289,7 +1318,14 @@ class _ComicReaderGalleryState extends _ComicReaderState {
             key: ValueKey(
                 'page_${widget.chapter.id}_${widget.chapter.images[index]}_$reloadKey'),
             builder: (BuildContext context, BoxConstraints constraints) {
-              return Image(
+              return Padding(
+                padding: readerSidePaddingOf(
+                  context,
+                  constraints,
+                  verticalReader: widget.readerDirection ==
+                      ReaderDirection.topToBottom,
+                ),
+                child: Image(
                 key: ValueKey(
                     'image_${widget.chapter.id}_${widget.chapter.images[index]}_$reloadKey'),
                 image: imageProvider,
@@ -1313,6 +1349,7 @@ class _ComicReaderGalleryState extends _ComicReaderState {
                     onReload: () => _reloadImage(index),
                   );
                 },
+              ),
               );
             },
           ),
@@ -1500,10 +1537,14 @@ class _ListViewReaderState extends _ComicReaderState {
         for (var index = 0; index < widget.chapter.images.length; index++) {
           late Size renderSize;
           if (_trueSizes[index] != null) {
-            if (currentReaderDirection == ReaderDirection.topToBottom) {
+            if (widget.readerDirection == ReaderDirection.topToBottom) {
+              final contentWidth = readerSideFrame(
+                verticalReader: true,
+                viewport: Size(constraints.maxWidth, constraints.maxHeight),
+              ).fit(constraints.maxWidth);
               renderSize = Size(
-                constraints.maxWidth,
-                constraints.maxWidth *
+                contentWidth,
+                contentWidth *
                     _trueSizes[index]!.height /
                     _trueSizes[index]!.width,
               );
@@ -1513,6 +1554,10 @@ class _ListViewReaderState extends _ComicReaderState {
                   (super._fullScreen
                       ? super._appBarHeight()
                       : super._bottomBarHeight());
+              maxHeight = readerSideFrame(
+                verticalReader: false,
+                viewport: Size(constraints.maxWidth, constraints.maxHeight),
+              ).fit(maxHeight);
               renderSize = Size(
                 maxHeight *
                     _trueSizes[index]!.width /
@@ -1521,13 +1566,23 @@ class _ListViewReaderState extends _ComicReaderState {
               );
             }
           } else {
-            if (currentReaderDirection == ReaderDirection.topToBottom) {
-              renderSize = Size(constraints.maxWidth, constraints.maxWidth / 2);
+            if (widget.readerDirection == ReaderDirection.topToBottom) {
+              final contentWidth = readerSideFrame(
+                verticalReader: true,
+                viewport: Size(constraints.maxWidth, constraints.maxHeight),
+              ).fit(constraints.maxWidth);
+              renderSize = Size(contentWidth, contentWidth / 2);
             } else {
               // ReaderDirection.LEFT_TO_RIGHT
               // ReaderDirection.RIGHT_TO_LEFT
               renderSize =
-                  Size(constraints.maxWidth / 2, constraints.maxHeight);
+                  Size(
+                constraints.maxWidth / 2,
+                readerSideFrame(
+                  verticalReader: false,
+                  viewport: Size(constraints.maxWidth, constraints.maxHeight),
+                ).fit(constraints.maxHeight),
+              );
             }
           }
           var currentIndex = index;
@@ -1580,7 +1635,11 @@ class _ListViewReaderState extends _ComicReaderState {
             if (widget.chapter.images.length == index) {
               return _buildNextEp();
             }
-            return _images[index];
+            return readerSideFrame(
+              verticalReader:
+                  widget.readerDirection == ReaderDirection.topToBottom,
+              viewport: Size(constraints.maxWidth, constraints.maxHeight),
+            ).place(_images[index]);
           },
         );
       },
@@ -1690,7 +1749,14 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
                       ReaderControllerType.touchDoubleOnceNext,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              return Row(
+              return Padding(
+                padding: readerSidePaddingOf(
+                  context,
+                  constraints,
+                  verticalReader: widget.readerDirection ==
+                      ReaderDirection.topToBottom,
+                ),
+                child: Row(
                 children: [
                   Expanded(
                     child: Align(
@@ -1759,6 +1825,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
                     ),
                   ),
                 ],
+                ),
               );
             },
           ),
@@ -1829,6 +1896,7 @@ class _TwoPageGalleryReaderState extends _ComicReaderState {
 
   @override
   Widget _buildViewer() {
+    _buildView();
     return Stack(
       children: [
         GestureDetector(

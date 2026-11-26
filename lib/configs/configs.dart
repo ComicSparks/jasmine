@@ -20,6 +20,7 @@ import 'package:jasmine/configs/pager_column_number.dart';
 import 'package:jasmine/configs/pager_cover_rate.dart';
 import 'package:jasmine/configs/passed.dart';
 import 'package:jasmine/configs/proxy.dart';
+import 'package:jasmine/configs/reader_side_inset.dart';
 import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/configs/recommend_links.dart';
 import 'package:jasmine/configs/search_title_words.dart';
@@ -72,6 +73,7 @@ Future initConfigs(BuildContext context) async {
   await initGestureSpeed();
   await initDragRegionLock();
   await initReaderZoomScale();
+  await initReaderSideInset();
   await initPagerColumnCount();
   await initPagerCoverRate();
   await initAutoClean();

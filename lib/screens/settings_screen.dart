@@ -13,6 +13,7 @@ import 'package:jasmine/configs/app_orientation.dart';
 import 'package:jasmine/configs/drag_region_lock.dart';
 import 'package:jasmine/configs/gesture_speed.dart';
 import 'package:jasmine/configs/network_shunts.dart';
+import 'package:jasmine/configs/reader_side_inset.dart';
 import 'package:jasmine/configs/reader_zoom_scale.dart';
 import 'package:jasmine/screens/downloads_exports_screen2.dart';
 import 'package:jasmine/screens/favorites_export_screen.dart';
@@ -293,6 +294,7 @@ class _SettingsState extends State<SettingsScreen> {
                 const Divider(),
                 gestureSpeedSetting(),
                 dragRegionLockSetting(),
+                const ReaderSideInsetSettings(),
                 readerZoomMinScaleSetting(),
                 readerZoomMaxScaleSetting(),
                 readerZoomDoubleTapScaleSetting(),
